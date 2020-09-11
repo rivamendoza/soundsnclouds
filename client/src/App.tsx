@@ -416,6 +416,13 @@ class App extends Component{
 
   private resetSteps() {
     this.forecast = [];
+    this.playlistOptions = {
+      name: "default",
+      description:"default",
+      numOfTracks: "default",
+      countryMarket: "default",
+      public:false
+    };
     this.chosenLocation = this.currentLocation;
     this.chosenWeather = this.currentWeather;
 

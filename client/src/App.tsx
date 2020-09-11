@@ -695,8 +695,12 @@ class App extends Component{
           <div className="body-div">
             {this.locationSection}
             {this.weatherSection}
-            {this.askCustomiseSection}
-            {this.customiseSection}
+
+            <div className="ask-customise-div">
+              {this.askCustomiseSection}
+              {this.customiseSection}
+            </div>
+
             {this.playlistSection}
           </div>    
 

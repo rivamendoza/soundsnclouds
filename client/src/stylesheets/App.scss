@@ -176,84 +176,95 @@
       }
     }
 
-    .ask {
-      width: 100%;
-      margin-left: 4%;
+    .ask-customise-div {
+      display: flex;
 
-      .customize-question{
-        display:flex;
-        justify-content: space-between;
+      .ask {
+        width: 30%;
+        margin-left: 4%;
+  
+        .customize-question{
+          display:flex;
+          // justify-content: space-between;
+          flex-direction: column;
+          align-items: center;
+          width: 100%;
+          height: 100%;
+ 
+          .question {
+            align-self: center;
+            padding: 4% 0%;
+            text-align: center;
+            
+          }
+  
+          .buttons {
+            button{
+              height: 100%;
+              width: 100%;
+              text-align: center;
+              padding-bottom: 3%;
+              margin: 0 0 0 0.25em !important;
+            }
+          }
+        }
+      }
+      .customise {
         width: 100%;
-        height: 100%;
-
-        .question {
-          margin: 0 !important;
-          align-self: center;
-        }
-
-        .buttons {
-          button{
-            height: 100%;
-            margin: 0 0 0 0.25em !important;
-          }
-        }
-      }
-    }
-
-    .customise {
-      width: 100%;
-      
-      .playlist-options {
-        display: flex;
-        flex-direction: column;      
-      }
-      .playlist-input{
-        margin: 0.5% 0%;
-      }
-
-      .playlist-size{
-        margin: 0.5% 0%;
-      }
-
-      .playlist-market{
-        margin: 0.5% 0%;
-      }
-
-      .last-row{
-        display: flex;
-        justify-content: space-between;
-        margin-top: 0.5%;
-
-        .other-options{
+        
+        .playlist-options {
           display: flex;
-          .playlist-size{
-            margin-right: 1%;
-          }
-  
-          .playlist-market{
-            margin-right: 1%;
-          }
-  
-          .public-div{
-            display: flex;
-            margin-right: 1%;
-  
-  
-            .public-label{
-              align-self: center;
-              text-align:center;
-              margin-right: 4%;
-            }
-  
-            .playlist-public{
-              align-self: center;
-            }
-          }
+          flex-direction: column;      
         }
-        .make-btn{
+        .playlist-input{
+          margin: 0.5% 0%;
+        }
+  
+        .playlist-size{
+          margin: 0.5% 0%;
+        }
+  
+        .playlist-market{
+          margin: 0.5% 0%;
+        }
+  
+        .last-row{
+          display: flex;
+          justify-content: space-between;
+          margin-top: 0.5%;
+  
+          .other-options{
+            display: flex;
+            .playlist-size{
+              margin-right: 1%;
+            }
+    
+            .playlist-market{
+              margin-right: 1%;
+            }
+    
+            .public-div{
+              display: flex;
+              margin-right: 1%;
+    
+    
+              .public-label{
+                align-self: center;
+                text-align:center;
+                margin-right: 4%;
+              }
+    
+              .playlist-public{
+                align-self: center;
+              }
+            }
+          }
+          .make-btn{
+          }
         }
       }
     }
+
 
     .playlist {
       height: 100%;
@@ -265,6 +276,7 @@
         width:100%;
       }
     }
+
     .step {
       margin-right: 3%;
       border-radius: 4px;

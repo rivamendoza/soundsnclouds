@@ -1,0 +1,405 @@
+.main-page{
+  background-image: url("./../assets/background.jpg");
+
+  width:100%;
+  height: 100%;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+  position: absolute;
+  overflow-y: scroll;
+  overflow-x: hidden;
+
+  .header-div {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 80px;
+    align-self: center;
+    background-color: rgba($color: #1C2023, $alpha:1);
+    padding: 1%;
+    z-index: 10000;
+    display: flex;
+    clear: both;
+
+    .header-img {
+      height: 50px;
+    }
+
+    .main-header {
+      position: relative;
+      left: 15px;
+      margin-top: 0 !important;
+      color: #F5F5F5 !important;
+      text-align: center;
+      font-style: italic;
+    }
+  }
+
+  .body-div{
+    padding-top: 80px;
+    margin-bottom: 1%;
+
+    .step-card{
+      display: flex;
+      margin-top: 2%;
+
+      .step-title{
+        width: 4%;
+        display: flex;
+        padding-top: 1%;
+        justify-content: flex-end;
+
+        .step-header {
+          color: #F5F5F5;
+          font-size: 28px;
+          transform: rotate(270deg);
+          transform-origin: top right;
+          position: relative;
+          height: fit-content;
+          width: fit-content;
+          text-align: center;
+          right: 65%;
+          padding: 2%;
+          white-space: nowrap;
+        }
+      }
+      
+    }
+
+    .location {
+      display: flex;
+      flex-direction: column;
+      width:100%;
+
+      .location-section{
+        width: 100%;
+        
+        .location-options{
+          display: flex;
+
+          .location-input {
+            width:100%;
+            margin-right: 0.5%;
+          }
+          
+          .search-location-btn{
+            margin-right: 0.5%;
+          }
+  
+          .use-location-btn {
+            
+          }
+          
+        }
+        .map{
+          margin-top: 1%;
+
+          .leaflet-container {
+            // border: 2px solid rgba($color: #1C2023, $alpha:0.8);
+            border-radius: 4px;
+            height: 50em;
+            width: 100%;
+          }
+        }
+      }
+    }
+
+    .weather {
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      
+      .weather-section{
+        width:100%;
+        background-color: #1C2023;
+        border-radius: 4px;
+        padding: 2%;
+        align-items: center;
+        display: flex;
+        flex-direction: column;
+        color: #F5F5F5;
+
+        .weather-cards{
+          width: 100%;
+          display: flex;
+          overflow-x: scroll;
+          justify-content: center;
+
+          .weather-card{
+            width: 100%;
+            border-radius: 4px;
+            padding: 2%;
+            transition: 0.3s;
+            display:flex;
+            flex-direction: column;
+            align-items: center;
+            margin:0.5%;
+        
+            &:hover{
+              background-color: rgba($color: #F5F5F5, $alpha: 0.6);
+              color: #1C2023 !important;
+            }
+
+            .title{
+              color: #F5F5F5
+            }
+
+            .icon{
+              height:max-content;
+              width:max-content;
+            }
+            .main{
+              font-size:18px
+            }
+            .description{
+              font-style: italic;
+              text-align: center;
+              margin: 0.5% 0%;
+              white-space: nowrap;
+            }  
+          }
+
+          .selected{
+            background-color: #6B949E;
+          }
+        }
+
+
+        .weather-header{ 
+          margin: 0 !important;
+          color: #F5F5F5;
+        }
+      }
+    }
+
+    .ask {
+      width: 100%;
+      margin-left: 4%;
+
+      .customize-question{
+        display:flex;
+        justify-content: space-between;
+        width: 100%;
+
+        .question {
+          margin: 0 !important;
+          align-self: center;
+        }
+
+        .buttons {
+          // place-self: flex-end;
+
+          button{
+            height: 100%;
+            margin: 0 0 0 0.25em !important;
+          }
+        }
+      }
+    }
+
+    .customise {
+      width: 100%;
+      
+      .playlist-options {
+        display: flex;
+        flex-direction: column;      
+      }
+      .playlist-input{
+        margin: 0.5% 0%;
+      }
+
+      .playlist-size{
+        margin: 0.5% 0%;
+      }
+
+      .playlist-market{
+        margin: 0.5% 0%;
+      }
+
+      .last-row{
+        display: flex;
+        justify-content: space-between;
+        margin-top: 0.5%;
+
+        .other-options{
+          display: flex;
+          .playlist-size{
+            margin-right: 1%;
+          }
+  
+          .playlist-market{
+            margin-right: 1%;
+          }
+  
+          .public-div{
+            display: flex;
+            margin-right: 1%;
+  
+  
+            .public-label{
+              align-self: center;
+              text-align:center;
+              margin-right: 4%;
+            }
+  
+            .playlist-public{
+              align-self: center;
+            }
+          }
+        }
+        .make-btn{
+        }
+      }
+    }
+
+    .playlist {
+      height: 100%;
+      width: 100%;
+
+      .spotify{
+        border-radius: 4px;
+        height:400px;
+        width:100%;
+      }
+    }
+    .step {
+      margin-right: 3%;
+      border-radius: 4px;
+      padding: 2%;
+      background-color: rgba($color: #F5F5F5, $alpha: 0.8);
+      transition: 0.3s;
+  
+      &:hover{
+        background-color: rgba($color: #F5F5F5, $alpha: 1);
+      }
+    }
+  
+    .output-section {
+      border: 2px solid;
+      margin: 2%;
+      border-radius: 4px;
+      padding: 2%;
+      height: 800px;
+    }
+  }
+}
+
+// semantic-ui change colors
+.ui.primary.button, .ui.primary.buttons .button {
+  background-color: #1C2023 !important;
+
+  &:hover{
+    background-color: rgba($color: #1C2023, $alpha:0.8) !important;
+  }
+
+  &:active{
+    background-color: rgba($color: #1F2F33, $alpha:1) !important;
+  }
+}
+
+.ui.secondary.button, .ui.secondary.buttons .button {
+  background-color: #6B949E !important;
+
+  &:hover{
+    background-color: rgba($color: #6B949E, $alpha:0.8) !important;
+  }
+
+  &:active{
+    background-color: rgba($color: #385057, $alpha:1) !important;
+  }
+}
+
+.ui.fitted.toggle.checkbox input:focus:checked~.box:before,
+.ui.fitted.toggle.checkbox input:focus:checked~label:before {
+    background-color: #365259 !important;
+}
+
+.ui.fitted.toggle.checkbox .box:before, .ui.toggle.checkbox label:before {
+    background-color: #F5F5F5 !important;
+}
+
+.ui.fitted.toggle.checkbox input:checked ~ .box:before,
+.ui.fitted.toggle.checkbox input:checked ~ label:before {
+  background-color: #365259 !important;
+}
+
+.ui.toggle.checkbox .box:before, .ui.toggle.checkbox label:before {
+  background-color: #F5F5F5 !important;
+}
+
+.ui.label, .ui.labels .label{
+  background-color: #1C2023 !important;
+  color: #F5F5F5!important;
+}
+
+.ui.pointing.label {
+  background-color: #6B949E !important;
+}
+
+// .ui.input>input{
+//   border: 2px solid rgba($color: #1C2023, $alpha:0.3) !important;
+// }
+
+.login-page {
+  background-image: url("./../assets/background.jpg");
+  height: 1000px;
+  width: 100%;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+  position: fixed;
+  overflow: scroll;
+
+  .header-div {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 80px;
+    align-self: center;
+    background-color: rgba($color: #1C2023, $alpha:1);
+    padding: 1%;
+    z-index: 10000;
+    display: flex;
+    clear: both;
+
+    .header-img {
+      height: 50px;
+    }
+    
+    .login-header{
+      position: relative;
+      left: 15px;
+      margin-top: 0 !important;
+      color: #F5F5F5 !important;
+      text-align: center;
+      font-style: italic;
+    }
+  }
+  
+  .login-body{
+    height: 90%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    .login-blurb{
+      height: auto;
+      font-size: 20px;
+      margin: 1.5% 0 !important;
+    }
+
+    .login-gif{
+      border-radius: 4px;
+      width: 30%;
+      margin-bottom: 2%;
+    }
+  
+    .login-btn{
+      border-radius: 4px;
+      font-size:20px;
+    }
+  }
+
+}

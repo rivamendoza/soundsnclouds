@@ -261,7 +261,6 @@ class App extends Component{
       .then(res => {
           // de render next steps since user has picked a new location
           this.resetSteps();
-          console.log(res);
 
           // update chosen city and country from geolocation
           this.chosenLocation.city = res.city;
@@ -417,6 +416,9 @@ class App extends Component{
 
   private resetSteps() {
     this.forecast = [];
+    this.chosenLocation = this.currentLocation;
+    this.chosenWeather = this.currentWeather;
+
     this.weatherSection = <></>;
     this.askCustomiseSection = <></>;
     this.customiseSection = <></>;

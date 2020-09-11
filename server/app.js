@@ -8,8 +8,8 @@ var cors = require("cors");
 var indexRouter = require('./routes/index');
 var locationRouter = require('./routes/location');
 var weatherRouter = require('./routes/weather');
-var authRouter = require('./routes/spotifyAuth');
-var playlistRouter = require('./routes/createPlaylist');
+var loginRouter = require('./routes/auth');
+var playlistRouter = require('./routes/playlist');
 
 var app = express();
 
@@ -24,19 +24,12 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
+// hook routers
 app.use('/', indexRouter);
 app.use('/location', locationRouter);
 app.use('/weather', weatherRouter);
-app.use('/auth', authRouter);
+app.use('/auth', loginRouter);
 app.use('/create', playlistRouter);
-
-// app.use('/', function(req, res, next) {
-//   console.log("allowing cors");
-//   res.header('Access-Control-Allow-Origin', '*');
-//   res.header('Access-Control-Allow-Methods', 'GET,POST,PUT,HEAD,DELETE,OPTIONS');
-//   res.header('Access-Control-Allow-Headers', 'content-Type,x-requested-with');
-//   next();
-// });
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

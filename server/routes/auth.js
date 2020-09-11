@@ -1,10 +1,12 @@
+/**
+ * auth route does auth0 authentication for spotify, endpoints:
+ * - auth/login
+ * - auth/callback
+ */
 const express = require('express');
 const request = require('request');
 const router = express.Router();
-const cors = require("cors");
-
 const querystring = require('querystring');
-const cookieParser = require('cookie-parser');
 
 // spotify api credentials
 const CLIENT_ID = 'c32e2b8a2a74444f9448149ddd2d22d8'; 
@@ -12,10 +14,11 @@ const CLIENT_SECRET = 'bc1a9f6e6cb543278f55e30d25ea1b4a';
 const REDIRECT_URI = 'http://localhost:9000/auth/callback'; 
 
 const stateKey = 'spotify_auth_state';
-// router.use(cors());
 
+/**
+ * redirects to spotify to authorise user
+ */
 router.get('/login', function(req, res) {
-
   let state = generateRandomString(16);
   let scope = 'user-read-private user-read-email playlist-modify-public playlist-modify-private';
 
@@ -31,6 +34,9 @@ router.get('/login', function(req, res) {
     }));
 })
 
+/**
+ * redirect back to website after authentication
+ */
 router.get("/callback", function(req, res) {
   let code = req.query.code || null;
   let state = req.query.state || null;
@@ -41,7 +47,8 @@ router.get("/callback", function(req, res) {
       querystring.stringify({
         error: 'state_mismatch'
       }));
-  } else {
+  } 
+  else {
     res.clearCookie(stateKey);
     let authOptions = {
       url: 'https://accounts.spotify.com/api/token',
@@ -70,7 +77,6 @@ router.get("/callback", function(req, res) {
 
         // use the access token to access the Spotify Web API
         request.get(options, function(error, response, body) {
-          // console.log(body);
           user_id = body.id;
 
           res.redirect('http://localhost:3000/'+
@@ -81,16 +87,8 @@ router.get("/callback", function(req, res) {
           }));
         });
 
-        // res.setHeader("access_token", access_token);
-        // res.redirect(301, 'http://localhost:3000/');
-
-        // res.redirect('http://localhost:3000/'+
-        //   querystring.stringify({
-        //     access_token: access_token,
-        //     // user_id: 
-        //     // refresh_token: refresh_token
-        //   }));
-      } else {
+      }
+      else {
         res.redirect('/#' +
           querystring.stringify({
             error: 'invalid_token'
@@ -100,7 +98,7 @@ router.get("/callback", function(req, res) {
   }
 })
 
-/****************************** HELPER METHODS ******************************/
+/****************************** HELPER FUNCTIONS ******************************/
 var generateRandomString = function(length) {
   var text = '';
   var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';

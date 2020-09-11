@@ -1,6 +1,11 @@
+/**
+ * playlist route parses weather information into playlists, endpoints:
+ * - playlist/name/playlistDesc/numTracks/market/makePublic/id/main/weatherDesc/temp/city/clouds/user/accessToken
+ * - playlist/id/main/desc/temp/city/clouds/user/accessToken
+ */
+
 const express = require('express');
 const request = require('request');
-const { param } = require('./weather');
 const router = express.Router();
 
 // seed information
@@ -12,6 +17,7 @@ const seed_genres = {
   scary: "electronic%2Cedm"
 }
 
+// enum of weather types
 const type =  {
   WET: 'WET',
   SNOW: 'SNOW',
@@ -25,7 +31,6 @@ const type =  {
 router.get('/:name/:playlistDesc/:numTracks/:market/:makePublic/:id/:main/:weatherDesc/:temp/:city/:clouds/:user/:accessToken', function (req, res) {
   let {name, playlistDesc, numTracks, market, makePublic, id, main, weatherDesc, temp, city, clouds, user, accessToken} = req.params;
 
-  console.log(req.params);
   // assign playlist properties, use default if unchanged or blank
   let playlist = {
     name: (name != "default" && name != "") ? name :`${main.toLowerCase()} in ${city.toLowerCase()}`,
@@ -50,8 +55,6 @@ router.get('/:name/:playlistDesc/:numTracks/:market/:makePublic/:id/:main/:weath
   if(playlist.market) {
     getTracksUrl += `&market=${playlist.market}`
   }
-
-  console.log(getTracksUrl);
 
   let getTracks = {
     url: getTracksUrl,
@@ -82,7 +85,7 @@ router.get('/:name/:playlistDesc/:numTracks/:market/:makePublic/:id/:main/:weath
 
     // create playlist
     if(!trackError && trackResponse.statusCode == 200) {
-      console.log(`reccomended tracks received`);
+      console.log(`Success: reccomended tracks received`);
 
       let tracks = getTrackUris(trackBody, playlist.limit);
 
@@ -102,12 +105,13 @@ router.get('/:name/:playlistDesc/:numTracks/:market/:makePublic/:id/:main/:weath
 
         // add tracks to playlist
         if(!createError && createResponse.statusCode == 201) {
-          console.log(`playlist created id: ${playlistId}`);
+          console.log(`Success: playlist created with id ${playlistId}`);
 
           request.post(addTracks, function(addError, addResponse, addBody){
-            console.log(`recommended tracks added to new playlist`);
 
             if(!addError && addResponse.statusCode == 201) {
+              console.log(`Success: recommended tracks added to new playlist`);
+
               res.send(playlistId)  //return new playlist id
             }
             else {
@@ -122,7 +126,7 @@ router.get('/:name/:playlistDesc/:numTracks/:market/:makePublic/:id/:main/:weath
       });
     }
     else{
-      res.send(`Error: Country (${playlist.market}) doesn't have an existing market on Spotify. Please try again without using that market.`);
+      res.send(`Error getting recommended tracks, country (${playlist.market}) likely doesn't have an existing market on Spotify. Please try again without using that market.`);
     }
   });
 })
@@ -132,7 +136,6 @@ router.get('/:id/:main/:desc/:temp/:city/:clouds/:user/:accessToken', function (
   const { id, main, desc, temp, city, clouds, user, accessToken } = req.params;
 
   let track = generateTrackParameters(id, clouds, temp);
-  console.log(req.params)
 
   let getTracksUrl = "https://api.spotify.com/v1/recommendations?"  + 
               `limit=10` + 
@@ -171,6 +174,8 @@ router.get('/:id/:main/:desc/:temp/:city/:clouds/:user/:accessToken', function (
 
     // create playlist
     if(!trackError && trackResponse.statusCode == 200) {
+      console.log(`Success: reccomended tracks received`);
+
       let tracks = getTrackUris(trackBody, 10);
 
       request.post(createPlaylist, function(createError, createResponse, createBody) {
@@ -189,7 +194,11 @@ router.get('/:id/:main/:desc/:temp/:city/:clouds/:user/:accessToken', function (
 
         // add tracks to playlist
         if(!createError && createResponse.statusCode == 201) {
+          console.log(`Success: playlist created with id ${playlistId}`);
+
           request.post(addTracks, function(addError, addResponse, addBody){
+            console.log(`Success: recommended tracks added to new playlist`);
+
             if(!addError && addResponse.statusCode == 201) {
               res.send(playlistId)  //return new playlist id
             }
@@ -210,8 +219,13 @@ router.get('/:id/:main/:desc/:temp/:city/:clouds/:user/:accessToken', function (
   });
 })
 
-// determine track parameters given weather id, cloud percentage and temperature
+/****************************** PLAYLIST GENERATOR METHODS ******************************/
+
+/**
+ * determine track parameters given weather id, cloud percentage and temperature
+ */
 function generateTrackParameters(id, clouds, temp) {
+  // initialise parameters
   let parameters = {
     seed_genre: seed_genres.clear,
     acousticness: -1,
@@ -223,12 +237,6 @@ function generateTrackParameters(id, clouds, temp) {
   let tempWeight = (temp > 0) ? temp/100 : 0;
   let cloudWeight = clouds/100;
   let weatherGroup = Math.floor(id/100 % 10);
-  // console.log("id: ", id);
-  // console.log("weather group: ", weatherGroup);
-  // console.log("clouds: ", clouds);
-  // console.log("cloudiness: ", cloudWeight);
-  // console.log("temp: ", temp);
-  // console.log("tempWeight: ", tempWeight);
 
   // SET SEED GENRE
   // clear skies
@@ -270,8 +278,6 @@ function generateTrackParameters(id, clouds, temp) {
     }
   }
 
-  // console.log("weather type: ", weather);
-
   // SET ACOUSTICNESS => cloudier = more acoustic
   parameters.acousticness = cloudWeight;  
 
@@ -294,7 +300,7 @@ function generateTrackParameters(id, clouds, temp) {
     parameters.valence = 1;
   }
   else if(weather == type.WET || weather == type.OVERCAST) {
-    parameters.valence = 0.5 * (2-cloudWeight)// the cloudier the less positive
+    parameters.valence = 0.5 * (2-cloudWeight) // the cloudier the less positive
   }
   else {
     parameters.valence = 0;
@@ -311,10 +317,14 @@ function generateTrackParameters(id, clouds, temp) {
     parameters.danceability = 0.5 + tempWeight;
   }
   
-  // console.log("parameters", parameters);
   return parameters;
 }
 
+/**
+ * retrieves track uris from results returned from recommended tracks api call
+ * @param {*} results 
+ * @param {*} count 
+ */
 function getTrackUris(results, count){
   let allTracks = results.tracks[0].uri;
   let regex = /:/gi;
@@ -325,8 +335,6 @@ function getTrackUris(results, count){
 
     allTracks = `${allTracks}%2C${track}`;
   }
-
-  // console.log(allTracks);
 
   return allTracks;
 }

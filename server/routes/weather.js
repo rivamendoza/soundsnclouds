@@ -1,3 +1,9 @@
+/**
+ * weather route uses openweathermaps to retrieve weather information, endpoints:
+ * - weather/city
+ * - weather/lat/long
+ * - weather/forecast/lat/long
+ */
 
 const express = require('express');
 const request = require('request');
@@ -6,19 +12,25 @@ const router = express.Router();
 // openweathermaps api credentials
 const CLIENT_ID = '61005c04e2164479f6b4fa8e51cb8535';
 
-// get weather by city
+/**
+ * get weather by city
+ */
 router.get('/:city', function (req, res) {
   const { city } = req.params;
   let url = `http://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${CLIENT_ID}`
 
   request(url, function (err, response, body) {
-    if(err){
+    if(err) {
+      console.log("Error getting weather information from city")
       res.send("error");
-    } else {
+    } 
+    else {
       let result = JSON.parse(body);
       if(result.cod !== 200) {
+        console.log("Error: city is invalid")
         res.send("Invalid city")
-      } else {
+      } 
+      else {
         let output = {
           index: 0,
           lat: result.coord.lat,
@@ -38,20 +50,26 @@ router.get('/:city', function (req, res) {
   });
 })
 
-// get weather by coordinates
+/**
+ * get weather by latitude and longitute coordinates
+ */
 router.get('/:lat/:long', function (req, res) {
   const { long, lat } = req.params;
 
   let url = `http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${long}&units=metric&appid=${CLIENT_ID}`;
+  
   request(url, function (err, response, body) {
-    if(err){
+    if(err) {
+      console.log("Error getting weather information from coordinates")
       res.send("error");
-    } else {
+    } 
+    else {
       let result = JSON.parse(body);
       if(result.cod !== 200) {
-        res.send("Invalid city")
-      } else {
-        
+        console.log("Error: coordinates are invalid")
+        res.send("Invalid coordinates")
+      } 
+      else {
         let output = {
           index: 0,
           city: (result.name) ? result.name : "Unknown City",
@@ -69,32 +87,20 @@ router.get('/:lat/:long', function (req, res) {
   });
 })
 
-
-// get weather history of city
-router.get('/history/:city', function (req, res) {
-  const { city } = "brisbane";
-  let url = `http://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${CLIENT_ID}`
-  // let url = `http://history.openweathermap.org/data/2.5/history/city?q=${city}&type=day&start=${start}&cnt=7&appid=${CLIENT_ID}`;
-  request(url, function (err, response, body) {
-    if(err){
-      res.send("error");
-    } else {
-      let result = JSON.parse(body);
-      res.send(result);
-    }
-  });
-})
-
-// get weather forecast of coordinates
+/**
+ * get weather forecast of latitude and longitute coordinates
+ */
 router.get('/forecast/:lat/:long', function (req, res) {
   const { lat, long } = req.params;
 
   let url = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${long}&%20exclude=hourly,daily&units=metric&appid=${CLIENT_ID}`
 
   request(url, function (err, response, body) {
-    if(err){
-      res.send("error");
-    } else {
+    if(err) {
+      console.log("Error getting weather forecast from coordinates")
+      res.send("Error getting weather forecast from coordinates");
+    } 
+    else {
       let result = JSON.parse(body);
       let forecast = getForecast(result.daily)
       res.send(forecast);
@@ -102,7 +108,11 @@ router.get('/forecast/:lat/:long', function (req, res) {
   });
 });
 
-// returns array of weather information for the next 7 days
+/****************************** HELPER FUNCTIONS ******************************/
+/**
+ * returns array of weather information for the next 7 days
+ * @param {*} daily: json array returned by forecast api call
+ */
 function getForecast(daily){
   let forecast = [];
 
@@ -124,7 +134,9 @@ function getForecast(daily){
   return forecast;
 }
 
-// converts unix timestamp to date DD MMM, today if today, tomorrow if tomorrow
+/**
+ * converts unix timestamp to date DD MMM
+ */
 function unixToDate(unixTime) {
   let newDate = new Date(unixTime * 1000);
   let fullDate = newDate.toUTCString().split(" ");   //Thu, 10 Sep 2020 18:00:00 GMT
@@ -132,4 +144,5 @@ function unixToDate(unixTime) {
   return(`${fullDate[0].split(',')[0]} ${fullDate[1]} ${fullDate[2]}`);
 
 }
+
 module.exports = router;

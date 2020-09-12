@@ -59,7 +59,7 @@
           height: fit-content;
           width: fit-content;
           text-align: center;
-          right: 65%;
+          right: 75%;
           padding: 2%;
           white-space: nowrap;
         }
@@ -99,11 +99,21 @@
           margin-top: 1%;
 
           .leaflet-container {
+            // cursor: crosshair !important;
             // border: 2px solid rgba($color: #1C2023, $alpha:0.8);
             border-radius: 4px;
             height: 50em;
             width: 100%;
+
+            &:hover{
+              cursor: pointer;
+            }
+
+            &:active{
+              cursor: grab;
+            }
           }
+
         }
       }
     }
@@ -127,7 +137,7 @@
           width: 100%;
           display: flex;
           overflow-x: scroll;
-          justify-content: center;
+          // justify-content: center;
 
           .weather-card{
             width: 100%;
@@ -270,7 +280,7 @@
       border-radius: 4px;
       padding: 2%;
       background-color: rgba($color: #F5F5F5, $alpha: 0.8);
-      transition: 0.3s;
+      // transition: 4s;
   
       &:hover{
         background-color: rgba($color: #F5F5F5, $alpha: 1);

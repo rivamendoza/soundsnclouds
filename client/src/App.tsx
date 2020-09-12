@@ -6,7 +6,7 @@ import { observable, action, observe } from "mobx";
 import { observer } from "mobx-react";
 import { Map, Marker, Popup, TileLayer } from 'react-leaflet';
 import { LatLngTuple } from 'leaflet';
-import { Input, Button, Label, Header, Dropdown, Checkbox } from 'semantic-ui-react'
+import { Input, Button, Label, Header, Dropdown, Checkbox, Modal } from 'semantic-ui-react'
 import Fade from 'react-reveal/Fade';
 
 import 'react-widgets/dist/css/react-widgets.css';
@@ -127,6 +127,9 @@ class App extends Component{
   @observable
   private nextSteps:boolean = false;
   
+  @observable
+  private tokenExpired:boolean = false;
+
   // elements to render
   @observable
   private leafletMap = <></>;
@@ -158,8 +161,6 @@ class App extends Component{
   private setSpotifyDetails() {
     this.spotify.accessToken = window.location.pathname.split("/")[1].split("=")[1].split("&user_id")[0];
     this.spotify.userId = window.location.pathname.split("user_id=")[1];
-    console.log("token:", this.spotify.accessToken);
-    console.log("user: ", this.spotify.userId);
   }
 
   /****************************** LOCATION ******************************/
@@ -177,14 +178,19 @@ class App extends Component{
       fetch(`http://localhost:9000/location/${this.currentLocation.lat}/${this.currentLocation.long}`)
         .then(res => res.json())
         .then(res => {
-          // assign current location to variable
-          this.currentLocation.city = res.city;
-          this.currentLocation.country = res.country;
+          // case of invalid geolocation
+          if(res.error) {
+            alert(`Error: ${res.error}`)
+          }
+          else {
+            // assign current location to variable
+            this.currentLocation.city = res.city;
+            this.currentLocation.country = res.country;
 
-          // re render leaflet map with current location as map center
-          this.renderLeafletMap(this.currentLocation.lat, this.currentLocation.long);
+            // re render leaflet map with current location as map center
+            this.renderLeafletMap(this.currentLocation.lat, this.currentLocation.long);
+          }
         })
-        .catch(err => console.log("Error: Unable to fetch city and country from geolocation", err))
     })
   }
 
@@ -196,26 +202,32 @@ class App extends Component{
     fetch(`http://localhost:9000/weather/${this.chosenLocation.city}`)
       .then(res => res.json())
       .then(res => {
-        // de render next steps since user has picked a new location
-        this.resetSteps();
+        // serverside error
+        if(res.error) {
+          alert(`Error: ${res.error}`);
+        }
+        else {
+          // reset next steps if user has picked a new location
+          if(this.weatherSection != <></>) this.resetToStep(1);
 
-        // update chosen city geolocation and country
-        this.chosenLocation.lat = res.lat;
-        this.chosenLocation.long = res.long;
-        this.chosenLocation.country = res.country;
+          // update chosen city geolocation and country
+          this.chosenLocation.lat = res.lat;
+          this.chosenLocation.long = res.long;
+          this.chosenLocation.country = res.country;
 
-        // assign current and chosen weather
-        this.currentWeather = res;
-        this.chosenWeather = res;
+          // assign current and chosen weather
+          this.currentWeather = res;
+          this.chosenWeather = res;
 
-        // fetch weather forecast for this location
-        this.fetchWeatherForecast(this.chosenLocation);
+          // fetch weather forecast for this location
+          this.fetchWeatherForecast(this.chosenLocation);
 
-        // re render leaflet map of chosen geolocation
-        this.markerPos = [this.chosenLocation.lat, this.chosenLocation.long];
-        this.renderLeafletMap(this.chosenLocation.lat, this.chosenLocation.long);
+          // re render leaflet map of chosen geolocation
+          this.markerPos = [this.chosenLocation.lat, this.chosenLocation.long];
+          this.renderLeafletMap(this.chosenLocation.lat, this.chosenLocation.long);
+        }
       })
-      .catch(err => console.log("Error: Unable to fetch weather from city", err))
+      .catch(err => alert(err))
   }
 
   /** 
@@ -226,23 +238,28 @@ class App extends Component{
     fetch(`http://localhost:9000/weather/${this.currentLocation.lat}/${this.currentLocation.long}`)
       .then(res => res.json())
       .then(res => {
-          // de render next steps since user has picked a new location
-          this.resetSteps();
+          // serverside error
+          if(res.error) {
+            alert(`Error: ${res.error}`);
+          }
+          else {
+            // reset next steps if user has picked a new location
+            if(this.weatherSection != <></>) this.resetToStep(1);
 
-          // assign current and chosen weather
-          this.currentWeather = res;
-          this.chosenWeather = res;
-          this.chosenWeather.index = 0;
+            // assign current and chosen weather
+            this.currentWeather = res;
+            this.chosenWeather = res;
+            this.chosenWeather.index = 0;
 
-          // fetch weather forecast for this location
-          this.fetchWeatherForecast(this.currentLocation);
+            // fetch weather forecast for this location
+            this.fetchWeatherForecast(this.currentLocation);
 
-          // re render leaflet map of current geolocation
-          this.markerPos = [this.currentLocation.lat, this.currentLocation.long];
-          this.renderLeafletMap(this.currentLocation.lat, this.currentLocation.long);
+            // re render leaflet map of current geolocation
+            this.markerPos = [this.currentLocation.lat, this.currentLocation.long];
+            this.renderLeafletMap(this.currentLocation.lat, this.currentLocation.long);
+          }
         }
       )
-    .catch(err => console.log("Error: Unable to fetch weather from geolocation", err))
   }
 
   /**
@@ -256,30 +273,33 @@ class App extends Component{
     this.chosenLocation.lat = e.latlng.lat;
     this.chosenLocation.long = e.latlng.lng;
 
+    // reset next steps if user has picked a new location
+    if(this.weatherSection != <></>) this.resetToStep(1);
+    
     fetch(`http://localhost:9000/weather/${this.chosenLocation.lat}/${this.chosenLocation.long}`)
       .then(res => res.json())
       .then(res => {
-          // de render next steps since user has picked a new location
-          this.resetSteps();
+          // serverside error
+          if(res.error) {
+            alert(`Error: ${res.error}`);
+          }
+          else {
+            // update chosen city and country from geolocation
+            this.chosenLocation.city = res.city;
+            this.chosenLocation.country = res.country;
 
-          // update chosen city and country from geolocation
-          this.chosenLocation.city = res.city;
-          this.chosenLocation.country = res.country;
+            // assign current and chosen weather
+            this.currentWeather = res;
+            this.chosenWeather = res;
 
-          // assign current and chosen weather
-          this.currentWeather = res;
-          this.chosenWeather = res;
+            // re render leaflet map of current geolocation
+            this.renderLeafletMap(this.chosenLocation.lat, this.chosenLocation.long);
 
-          console.log(this.currentWeather);
-
-          // re render leaflet map of current geolocation
-          this.renderLeafletMap(this.chosenLocation.lat, this.chosenLocation.long);
-
-          // fetch weather forecast for this location
-          this.fetchWeatherForecast(this.chosenLocation);
+            // fetch weather forecast for this location
+            this.fetchWeatherForecast(this.chosenLocation);
+          }          
         }
       )
-      .catch(err => console.log("Error: Unable to fetch weather from geolocation", err))
   }
 
   @action
@@ -300,6 +320,11 @@ class App extends Component{
     fetch(`http://localhost:9000/weather/forecast/${location.lat}/${location.long}`)
     .then(res => res.json())
     .then(res => {
+      // serverside error
+      if(res.error) {
+        alert(`Error: ${res.error}`);
+      }
+
       // assign results to forecast array
       res.forEach((day, i) => {
         this.forecast.push({
@@ -319,7 +344,6 @@ class App extends Component{
       // render weather section with no chosen index
       this.renderWeatherSection(-1);
     })
-    .catch(err => console.log("Error: Unable to fetch weather forecast", err))
   }
 
   @action
@@ -372,16 +396,46 @@ class App extends Component{
               `${this.chosenWeather.id}/${this.chosenWeather.main}/${this.chosenWeather.description}/${this.chosenWeather.temp.split('°')[0]}/${this.chosenWeather.city}/${this.chosenWeather.clouds}/` + 
               `${this.spotify.userId}/${this.spotify.accessToken}`)
       .then(res => res.text())
-      .then(res => this.setPlaylist(res))
-      .catch(err => err)
+      .then(res => {
+        // case where country market doesn't exist
+        if(res.includes("400")) {
+          alert(res);
+          this.resetToStep(3);
+        }
+        // case where access token has expired or user id is invalid
+        else if(res.includes("Account Error")) {
+          this.tokenExpired = true;
+          alert(res);
+        }
+        // other spotify related error
+        else if(res.includes("Error")){
+          alert(res);
+        }
+        else {
+          this.setPlaylist(res)
+        }
+      })
     }
     else {
+      this.resetToStep(3)
       fetch(`http://localhost:9000/create/`+
             `${this.chosenWeather.id}/${this.chosenWeather.main}/${this.chosenWeather.description}/${this.chosenWeather.temp.split('°')[0]}/${this.chosenWeather.city}/${this.chosenWeather.clouds}/`+
             `${this.spotify.userId}/${this.spotify.accessToken}`)
       .then(res => res.text())
-      .then(res => this.setPlaylist(res))
-      .catch(err => err)
+      .then(res => {
+        // case where access token has expired or user id is invalid
+        if(res.includes("Account Error")) {
+          this.tokenExpired = true;
+          alert(res);
+        }
+        // other spotify related error
+        else if(res.includes("Error")){
+          alert(res);
+        }
+        else {
+          this.setPlaylist(res)
+        }
+      })
     }
   }
   
@@ -414,22 +468,32 @@ class App extends Component{
     return this.footer?.scrollIntoView({behavior:'smooth'});
   }
 
-  private resetSteps() {
-    this.forecast = [];
-    this.playlistOptions = {
-      name: "default",
-      description:"default",
-      numOfTracks: "default",
-      countryMarket: "default",
-      public:false
-    };
-    this.chosenLocation = this.currentLocation;
-    this.chosenWeather = this.currentWeather;
-
-    this.weatherSection = <></>;
-    this.askCustomiseSection = <></>;
-    this.customiseSection = <></>;
-    this.playlistSection = <></>;
+  private resetToStep(step:number) {
+    // reset to customise option section
+    if(step <= 4) {
+      this.playlistSection = <></>;
+    }
+    // reset to ask customise section
+    if(step <= 3) {
+      this.playlistOptions = {
+        name: "default",
+        description:"default",
+        numOfTracks: "default",
+        countryMarket: "default",
+        public:false
+      };
+      this.customiseSection = <></>;
+      // this.playlistSection = <></>;
+    }
+    // reset to weather forecast section
+    if(step <= 2) {
+      this.askCustomiseSection = <></>;
+    }
+    // reset to location section 
+    if(step <= 1) {
+      this.forecast = [];
+      this.weatherSection = <></>;
+    }
   }
 
   private keyPressed(e:any) {
@@ -443,7 +507,7 @@ class App extends Component{
     let zoomLevel = 8;
 
     this.leafletMap = 
-    <>
+    <div className="map">
       <Label pointing="below">you can click on the map to pick a location!</Label>
       <Map center={mapCenter} zoom={zoomLevel} onclick={(e) => this.onMapClicked(e)}>
           <TileLayer
@@ -456,7 +520,7 @@ class App extends Component{
           </Popup>
         </Marker> 
       </Map>
-    </>
+    </div>
 
     this.renderLocationSection();
   }
@@ -496,10 +560,8 @@ class App extends Component{
                   Use my location
                 </Button>              
               </div>
-
-              <div className={"map"}>
-                  {this.leafletMap}
-              </div>
+              {this.leafletMap}
+              
           </div>
         </div>
       </section>
@@ -511,6 +573,7 @@ class App extends Component{
   @action
   private renderWeatherSection(chosen:number) {
     this.nextSteps = true;
+    if(this.askCustomiseSection != <></>) this.resetToStep(2);
     let header = (this.currentWeather.country == "") ? "Unknown Place" : `${this.currentWeather.city}, ${this.currentWeather.country}`;
     let todayIcon = "http://openweathermap.org/img/wn/" + this.currentWeather.iconCode + "@2x.png";
     let dailyWeather:any = [];
@@ -595,6 +658,9 @@ class App extends Component{
 
   @action
   private renderCustomiseSection() {
+    // reset playlist section if user changes their customise answer
+    if(this.playlistSection != <></>) this.resetToStep(4);
+
     let numTracks:any = [];
     let countryMarket = [
       {key: 0, text: `(${this.currentLocation.country}) Market`, value: this.currentLocation.country}
@@ -684,7 +750,7 @@ class App extends Component{
 
   render() {
     // render main page if user has logged in to spotify
-    if(this.loggedIn) {
+    if(this.loggedIn && !this.tokenExpired) {
       return (
         <div className="main-page">
           <div className="header-div">

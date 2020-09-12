@@ -24,6 +24,7 @@ router.get('/login', function(req, res) {
 
   res.cookie(stateKey, state)
 
+  // redirect to spotify accounts service
   res.redirect('https://accounts.spotify.com/authorize?' +
     querystring.stringify({
       response_type: 'code',

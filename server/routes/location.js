@@ -19,18 +19,19 @@ router.get('/:lat/:long', function (req, res) {
     let url = `http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${long}&units=metric&appid=${CLIENT_ID}`;
 
     request(url, function (err, response, body) {
-      if(err){
-        res.send("Error getting city and country name from location");
-      } 
-      else {
-        let result = JSON.parse(body);
-
+      let result = JSON.parse(body);
+      
+      // geolocation is valid
+      if(result.cod == 200 || result.cod == 304) {
         let location = {
           city: result.name,
           country: result.sys.country
         }
-        
+
         res.send(location);
+      } 
+      else {
+        res.send({error: "invalid geolocation"})
       }
     });
 })

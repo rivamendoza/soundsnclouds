@@ -1,0 +1,342 @@
+.main-page {
+  background-image: url("./../assets/background.jpg");
+  width: 100%;
+  height: 100%;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+  position: absolute;
+  overflow-y: scroll;
+  overflow-x: hidden;
+}
+.main-page .header-div {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 80px;
+  align-self: center;
+  background-color: #1c2023;
+  padding: 1%;
+  z-index: 10000;
+  display: flex;
+  clear: both;
+}
+.main-page .header-div .header-img {
+  height: 50px;
+}
+.main-page .header-div .main-header {
+  position: relative;
+  left: 15px;
+  margin-top: 0 !important;
+  color: #F5F5F5 !important;
+  text-align: center;
+  font-style: italic;
+}
+.main-page .body-div {
+  padding-top: 80px;
+  margin-bottom: 1%;
+}
+.main-page .body-div .step-card {
+  display: flex;
+  margin-top: 2%;
+}
+.main-page .body-div .step-card .step-title {
+  width: 4%;
+  display: flex;
+  padding-top: 1%;
+  justify-content: flex-end;
+}
+.main-page .body-div .step-card .step-title .step-header {
+  color: #F5F5F5;
+  font-size: 28px;
+  transform: rotate(270deg);
+  transform-origin: top right;
+  position: relative;
+  height: fit-content;
+  width: fit-content;
+  text-align: center;
+  right: 75%;
+  padding: 2%;
+  white-space: nowrap;
+}
+.main-page .body-div .location {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+.main-page .body-div .location .location-section {
+  width: 100%;
+}
+.main-page .body-div .location .location-section .location-options {
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+.main-page .body-div .location .location-section .location-options .location-input {
+  width: 100%;
+  margin-right: 0.5%;
+}
+.main-page .body-div .location .location-section .location-options .search-location-btn {
+  margin-right: 0.5%;
+}
+.main-page .body-div .location .location-section .location-options .use-location-btn {
+  min-width: 10%;
+}
+.main-page .body-div .location .location-section .map {
+  margin-top: 1%;
+}
+.main-page .body-div .location .location-section .map .leaflet-container {
+  border-radius: 4px;
+  height: 50em;
+  width: 100%;
+}
+.main-page .body-div .location .location-section .map .leaflet-container:hover {
+  cursor: pointer;
+}
+.main-page .body-div .location .location-section .map .leaflet-container:active {
+  cursor: grab;
+}
+.main-page .body-div .weather {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+.main-page .body-div .weather .weather-section {
+  width: 100%;
+  background-color: #1C2023;
+  border-radius: 4px;
+  padding: 2%;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  color: #F5F5F5;
+}
+.main-page .body-div .weather .weather-section .weather-cards {
+  width: 100%;
+  display: flex;
+  overflow-x: scroll;
+}
+.main-page .body-div .weather .weather-section .weather-cards .weather-card {
+  width: 100%;
+  border-radius: 4px;
+  padding: 2%;
+  transition: 0.3s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0.5%;
+}
+.main-page .body-div .weather .weather-section .weather-cards .weather-card:hover {
+  background-color: rgba(245, 245, 245, 0.6);
+  color: #1C2023 !important;
+}
+.main-page .body-div .weather .weather-section .weather-cards .weather-card .title {
+  color: #F5F5F5;
+}
+.main-page .body-div .weather .weather-section .weather-cards .weather-card .icon {
+  height: max-content;
+  width: max-content;
+}
+.main-page .body-div .weather .weather-section .weather-cards .weather-card .main {
+  font-size: 18px;
+}
+.main-page .body-div .weather .weather-section .weather-cards .weather-card .description {
+  font-style: italic;
+  text-align: center;
+  margin: 0.5% 0%;
+  white-space: nowrap;
+}
+.main-page .body-div .weather .weather-section .weather-cards .selected {
+  background-color: #6B949E;
+}
+.main-page .body-div .weather .weather-section .weather-header {
+  margin: 0 !important;
+  color: #F5F5F5;
+}
+.main-page .body-div .ask {
+  width: 100%;
+  margin-left: 4%;
+}
+.main-page .body-div .ask .customize-question {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+}
+.main-page .body-div .ask .customize-question .question {
+  margin: 0 !important;
+  align-self: center;
+}
+.main-page .body-div .ask .customize-question .buttons button {
+  height: 100%;
+  margin: 0 0 0 0.25em !important;
+}
+.main-page .body-div .customise {
+  width: 100%;
+}
+.main-page .body-div .customise .playlist-options {
+  display: flex;
+  flex-direction: column;
+}
+.main-page .body-div .customise .playlist-input {
+  margin: 0.5% 0%;
+}
+.main-page .body-div .customise .playlist-size {
+  margin: 0.5% 0%;
+}
+.main-page .body-div .customise .playlist-market {
+  margin: 0.5% 0%;
+}
+.main-page .body-div .customise .last-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.5%;
+}
+.main-page .body-div .customise .last-row .other-options {
+  display: flex;
+}
+.main-page .body-div .customise .last-row .other-options .playlist-size {
+  margin-right: 1%;
+}
+.main-page .body-div .customise .last-row .other-options .playlist-market {
+  margin-right: 1%;
+}
+.main-page .body-div .customise .last-row .other-options .public-div {
+  display: flex;
+  margin-right: 1%;
+}
+.main-page .body-div .customise .last-row .other-options .public-div .public-label {
+  align-self: center;
+  text-align: center;
+  margin-right: 4%;
+}
+.main-page .body-div .customise .last-row .other-options .public-div .playlist-public {
+  align-self: center;
+}
+.main-page .body-div .playlist {
+  height: 100%;
+  width: 100%;
+}
+.main-page .body-div .playlist .spotify {
+  border-radius: 4px;
+  height: 400px;
+  width: 100%;
+}
+.main-page .body-div .step {
+  margin-right: 3%;
+  border-radius: 4px;
+  padding: 2%;
+  background-color: rgba(245, 245, 245, 0.8);
+}
+.main-page .body-div .step:hover {
+  background-color: whitesmoke;
+}
+.main-page .body-div .output-section {
+  border: 2px solid;
+  margin: 2%;
+  border-radius: 4px;
+  padding: 2%;
+  height: 800px;
+}
+
+.ui.primary.button, .ui.primary.buttons .button {
+  background-color: #1C2023 !important;
+}
+.ui.primary.button:hover, .ui.primary.buttons .button:hover {
+  background-color: rgba(28, 32, 35, 0.8) !important;
+}
+.ui.primary.button:active, .ui.primary.buttons .button:active {
+  background-color: #1f2f33 !important;
+}
+
+.ui.secondary.button, .ui.secondary.buttons .button {
+  background-color: #6B949E !important;
+}
+.ui.secondary.button:hover, .ui.secondary.buttons .button:hover {
+  background-color: rgba(107, 148, 158, 0.8) !important;
+}
+.ui.secondary.button:active, .ui.secondary.buttons .button:active {
+  background-color: #385057 !important;
+}
+
+.ui.fitted.toggle.checkbox input:focus:checked ~ .box:before,
+.ui.fitted.toggle.checkbox input:focus:checked ~ label:before {
+  background-color: #365259 !important;
+}
+
+.ui.fitted.toggle.checkbox .box:before, .ui.toggle.checkbox label:before {
+  background-color: #F5F5F5 !important;
+}
+
+.ui.fitted.toggle.checkbox input:checked ~ .box:before,
+.ui.fitted.toggle.checkbox input:checked ~ label:before {
+  background-color: #365259 !important;
+}
+
+.ui.toggle.checkbox .box:before, .ui.toggle.checkbox label:before {
+  background-color: #F5F5F5 !important;
+}
+
+.ui.label, .ui.labels .label {
+  background-color: #1C2023 !important;
+  color: #F5F5F5 !important;
+}
+
+.ui.pointing.label {
+  background-color: #6B949E !important;
+}
+
+.login-page {
+  background-image: url("./../assets/background.jpg");
+  height: 1000px;
+  width: 100%;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+  position: fixed;
+  overflow: scroll;
+}
+.login-page .header-div {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  height: 80px;
+  align-self: center;
+  background-color: #1c2023;
+  padding: 1%;
+  z-index: 10000;
+  display: flex;
+  clear: both;
+}
+.login-page .header-div .header-img {
+  height: 50px;
+}
+.login-page .header-div .login-header {
+  position: relative;
+  left: 15px;
+  margin-top: 0 !important;
+  color: #F5F5F5 !important;
+  text-align: center;
+  font-style: italic;
+}
+.login-page .login-body {
+  height: 90%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.login-page .login-body .login-blurb {
+  height: auto;
+  font-size: 20px;
+  margin: 1.5% 0 !important;
+}
+.login-page .login-body .login-gif {
+  border-radius: 4px;
+  width: 30%;
+  margin-bottom: 2%;
+}
+.login-page .login-body .login-btn {
+  border-radius: 4px;
+  font-size: 20px;
+}

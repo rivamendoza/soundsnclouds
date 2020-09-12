@@ -17,35 +17,36 @@ const CLIENT_ID = '61005c04e2164479f6b4fa8e51cb8535';
  */
 router.get('/:city', function (req, res) {
   const { city } = req.params;
-  let url = `http://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${CLIENT_ID}`
+  let url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&units=metric&appid=${CLIENT_ID}`
 
   request(url, function (err, response, body) {
-    if(err) {
-      console.log("Error getting weather information from city")
-      res.send("error");
-    } 
+    let result = JSON.parse(body);
+
+    // if city is valid
+    if(result.cod == 200) {
+      let output = {
+        index: 0,
+        lat: result.coord.lat,
+        long: result.coord.lon,
+        city: result.name,
+        country: result.sys.country,
+        id: result.weather[0].id,
+        iconCode: result.weather[0].icon,
+        main: result.weather[0].main,
+        description: result.weather[0].description,
+        clouds: result.clouds.all,
+        temp: result.main.temp + "°C"
+      }
+      res.send(output)
+    }
+    else if (result.cod == 404){
+      res.send({error: "invalid city"})
+    }
+    else if(result.cod == 401) {
+      res.send({error: "invalid API key"})
+    }
     else {
-      let result = JSON.parse(body);
-      if(result.cod !== 200) {
-        console.log("Error: city is invalid")
-        res.send("Invalid city")
-      } 
-      else {
-        let output = {
-          index: 0,
-          lat: result.coord.lat,
-          long: result.coord.lon,
-          city: result.name,
-          country: result.sys.country,
-          id: result.weather[0].id,
-          iconCode: result.weather[0].icon,
-          main: result.weather[0].main,
-          description: result.weather[0].description,
-          clouds: result.clouds.all,
-          temp: result.main.temp + "°C"
-        }
-        res.send(output)
-      } 
+      res.send({error: "unable to fetch weather information from city"})
     }
   });
 })
@@ -56,33 +57,34 @@ router.get('/:city', function (req, res) {
 router.get('/:lat/:long', function (req, res) {
   const { long, lat } = req.params;
 
-  let url = `http://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${long}&units=metric&appid=${CLIENT_ID}`;
+  let url = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${long}&units=metric&appid=${CLIENT_ID}`;
   
   request(url, function (err, response, body) {
-    if(err) {
-      console.log("Error getting weather information from coordinates")
-      res.send("error");
+    let result = JSON.parse(body);
+
+    // if geolocation is valid
+    if(result.cod == 200) {
+      let output = {
+        index: 0,
+        city: (result.name) ? result.name : "Unknown City",
+        country: (result.sys.country) ? result.sys.country : "",
+        id: result.weather[0].id,
+        iconCode: result.weather[0].icon,
+        main: result.weather[0].main,
+        description: result.weather[0].description,
+        clouds: result.clouds.all,
+        temp: result.main.temp + "°C"
+      }
+      res.send(output)
     } 
+    else if (result.cod == 400){
+      res.send({error: "invalid coordinates"})
+    }
+    else if(result.cod == 401) {
+      res.send({error: "invalid API key"})
+    }
     else {
-      let result = JSON.parse(body);
-      if(result.cod !== 200) {
-        console.log("Error: coordinates are invalid")
-        res.send("Invalid coordinates")
-      } 
-      else {
-        let output = {
-          index: 0,
-          city: (result.name) ? result.name : "Unknown City",
-          country: (result.sys.country) ? result.sys.country : "",
-          id: result.weather[0].id,
-          iconCode: result.weather[0].icon,
-          main: result.weather[0].main,
-          description: result.weather[0].description,
-          clouds: result.clouds.all,
-          temp: result.main.temp + "°C"
-        }
-        res.send(output)
-      } 
+      res.send({error: "unable to fetch weather information from geolocation"})
     }
   });
 })
@@ -96,16 +98,20 @@ router.get('/forecast/:lat/:long', function (req, res) {
   let url = `https://api.openweathermap.org/data/2.5/onecall?lat=${lat}&lon=${long}&%20exclude=hourly,daily&units=metric&appid=${CLIENT_ID}`
 
   request(url, function (err, response, body) {
-    if(err) {
-      console.log("Error getting weather forecast from coordinates")
-      res.send("Error getting weather forecast from coordinates");
-    } 
+    let result = JSON.parse(body);
+
+    // if geolocation is invalid there will be a result.cod attribute
+    if (result.cod == 400) {
+      res.send({error: "invalid coordinates"})
+    }
+    else if(result.cod == 401) {
+      res.send({error: "invalid API key"})
+    }
     else {
-      let result = JSON.parse(body);
       let forecast = getForecast(result.daily)
       res.send(forecast);
     }
-  });
+  }); 
 });
 
 /****************************** HELPER FUNCTIONS ******************************/

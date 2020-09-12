@@ -66,6 +66,7 @@ router.get('/:name/:playlistDesc/:numTracks/:market/:makePublic/:id/:main/:weath
     json: true
   };
 
+  
   // get recommended tracks
   request.get(getTracks, function(trackError, trackResponse, trackBody) {
     let createPlaylist = {
@@ -111,22 +112,23 @@ router.get('/:name/:playlistDesc/:numTracks/:market/:makePublic/:id/:main/:weath
 
             if(!addError && addResponse.statusCode == 201) {
               console.log(`Success: recommended tracks added to new playlist`);
-
               res.send(playlistId)  //return new playlist id
             }
             else {
-              res.send("Error adding tracks to new playlist");
+              res.send(`Error ${addResponse.statusCode}: could not add tracks to new playlist`);
             }
           });
         }
         else {
-          res.send("Error creating playlist");
+          res.send(`Account Error ${createResponse.statusCode}: Could not create playlist. Access token and/or user id is invalid. Please log in again.`);
         }
-        
       });
     }
+    else if(trackResponse.statusCode == 401) {
+      res.send(`Account Error ${trackResponse.statusCode}: Access token is invalid or has expired. Please log in again.`);
+    }
     else{
-      res.send(`Error getting recommended tracks, country (${playlist.market}) likely doesn't have an existing market on Spotify. Please try again without using that market.`);
+      res.send(`Error ${trackResponse.statusCode}: Country (${playlist.market}) likely doesn't have an existing market on Spotify. Please try again without using that market.`);
     }
   });
 })
@@ -203,15 +205,18 @@ router.get('/:id/:main/:desc/:temp/:city/:clouds/:user/:accessToken', function (
               res.send(playlistId)  //return new playlist id
             }
             else {
-              res.send("Error adding tracks to new playlist");
+              res.send(`Error ${addResponse.statusCode}: could not add tracks to new playlist`);
             }
           });
         }
         else {
-          res.send("Error creating playlist");
+          res.send(`Account Error ${createResponse.statusCode}: Could not create playlist. Access token and/or user id is invalid. Please log in again.`);
         }
         
       });
+    }
+    else if(trackResponse.statusCode == 401) {
+      res.send(`Account Error ${trackResponse.statusCode}: Access token is invalid or has expired. Please log in again.`);
     }
     else{
       res.send("Error getting recommended tracks")

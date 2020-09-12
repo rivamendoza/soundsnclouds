@@ -34,7 +34,7 @@ var App = /** @class */ (function (_super) {
     __extends(App, _super);
     function App() {
         var _this = _super !== null && _super.apply(this, arguments) || this;
-        // initialise props
+        // stores customised playlist options
         _this.playlistOptions = {
             name: "default",
             description: "default",
@@ -42,8 +42,10 @@ var App = /** @class */ (function (_super) {
             countryMarket: "default",
             public: false
         };
-        _this.weather = {
+        // stores today's weather information
+        _this.currentWeather = {
             id: 0,
+            index: 0,
             city: "",
             country: "",
             iconCode: "",
@@ -52,6 +54,21 @@ var App = /** @class */ (function (_super) {
             temp: "",
             clouds: 0
         };
+        // stores week's weather information in array
+        _this.forecast = [];
+        // stores weather chosen to make playlist from
+        _this.chosenWeather = {
+            id: 0,
+            index: 0,
+            city: "",
+            country: "",
+            iconCode: "",
+            main: "",
+            description: "",
+            temp: "",
+            clouds: 0
+        };
+        // stores user's current location
         _this.currentLocation = {
             useCoords: false,
             city: "",
@@ -59,6 +76,7 @@ var App = /** @class */ (function (_super) {
             lat: 0,
             long: 0
         };
+        // stores location chosen to get weather from
         _this.chosenLocation = {
             useCoords: false,
             city: "",
@@ -66,217 +84,338 @@ var App = /** @class */ (function (_super) {
             lat: 0,
             long: 0
         };
+        // stores user's spotify information
         _this.spotify = {
             accessToken: "",
             userId: ""
         };
         _this.markerPos = [0, 0];
-        _this.currentLocationClicked = false;
-        _this.spotifyOutput = "";
+        _this.loggedIn = false;
+        _this.nextSteps = false;
+        _this.tokenExpired = false;
+        // elements to render
         _this.leafletMap = react_1["default"].createElement(react_1["default"].Fragment, null);
         _this.playlistSection = react_1["default"].createElement(react_1["default"].Fragment, null);
         _this.askCustomiseSection = react_1["default"].createElement(react_1["default"].Fragment, null);
         _this.customiseSection = react_1["default"].createElement(react_1["default"].Fragment, null);
         _this.locationSection = react_1["default"].createElement(react_1["default"].Fragment, null);
         _this.weatherSection = react_1["default"].createElement(react_1["default"].Fragment, null);
-        _this.loggedIn = false;
         return _this;
     }
     /****************************** LOGIN ******************************/
-    // private spotifyLogin() {
-    //   console.log("fetching login");
-    //   return( 
-    //     <a href="http://localhost:9000/auth/login">sign in with spotify</a>
-    //   );
-    //   fetch(`https://accounts.spotify.com/authorize?response_type=code&client_id=c32e2b8a2a74444f9448149ddd2d22d8&scope=user-read-private%20user-read-email&redirect_uri=http%3A%2F%2Flocalhost%3A9000%2Fauth%2Fcallback&state=rs4Meq8AnNV0HvdF`,{
-    //     mode: "no-cors"
-    //   }).then((res) => console.log(res));
-    //   // fetch(`http://localhost:9000/auth/login`, {
-    //   //   // mode: "no-cors",
-    //   //   // credentials: 'include'
-    //   // })
-    //   // .then(res => res.text())
-    //   // .then(res => this.setSpotifyToken(res))
-    //   // .catch(err => console.log("error", err))
-    // }
+    /**
+     * set spotify access token from endpoint
+     */
     App.prototype.setSpotifyDetails = function () {
-        //set spotify token from endpoint
         this.spotify.accessToken = window.location.pathname.split("/")[1].split("=")[1].split("&user_id")[0];
         this.spotify.userId = window.location.pathname.split("user_id=")[1];
-        console.log("token ", this.spotify.accessToken);
-        console.log("user", this.spotify.userId);
     };
     /****************************** LOCATION ******************************/
+    /**
+     * get current location of user
+     */
     App.prototype.getCurrentLocation = function () {
         var _this = this;
-        // get current location of user
         navigator.geolocation.getCurrentPosition(function (position) {
             _this.currentLocation.lat = parseFloat(position.coords.latitude.toPrecision());
             _this.currentLocation.long = parseFloat(position.coords.longitude.toPrecision());
             _this.markerPos = [_this.currentLocation.lat, _this.currentLocation.long];
-            console.log(_this.currentLocation);
             //fetch city and country of geolocation
             fetch("http://localhost:9000/location/" + _this.currentLocation.lat + "/" + _this.currentLocation.long)
                 .then(function (res) { return res.json(); })
                 .then(function (res) {
-                _this.currentLocation.city = res.city;
-                _this.currentLocation.country = res.country;
-                _this.renderLeafletMap(_this.currentLocation.lat, _this.currentLocation.long);
-            })["catch"](function (err) { return err; });
+                // case of invalid geolocation
+                if (res.error) {
+                    alert("Error: " + res.error);
+                }
+                else {
+                    // assign current location to variable
+                    _this.currentLocation.city = res.city;
+                    _this.currentLocation.country = res.country;
+                    // re render leaflet map with current location as map center
+                    _this.renderLeafletMap(_this.currentLocation.lat, _this.currentLocation.long);
+                }
+            });
         });
     };
+    /**
+     * fetch weather information of chosen city
+     */
     App.prototype.onSearch = function () {
         var _this = this;
-        // fetch weather information of chosen city
         fetch("http://localhost:9000/weather/" + this.chosenLocation.city)
             .then(function (res) { return res.json(); })
             .then(function (res) {
-            // update chosen city geolocation and country
-            _this.chosenLocation.lat = res.lat;
-            _this.chosenLocation.long = res.long;
-            _this.chosenLocation.country = res.country;
-            // render weather module
-            _this.renderWeather(res);
-            // re render leaflet map of chosen geolocation
-            _this.markerPos = [_this.chosenLocation.lat, _this.chosenLocation.long];
-            _this.renderLeafletMap(_this.chosenLocation.lat, _this.chosenLocation.long);
-        })["catch"](function (err) { return console.log("error!"); });
+            // serverside error
+            if (res.error) {
+                alert("Error: " + res.error);
+            }
+            else {
+                // reset next steps if user has picked a new location
+                if (_this.weatherSection != react_1["default"].createElement(react_1["default"].Fragment, null))
+                    _this.resetToStep(1);
+                // update chosen city geolocation and country
+                _this.chosenLocation.lat = res.lat;
+                _this.chosenLocation.long = res.long;
+                _this.chosenLocation.country = res.country;
+                // assign current and chosen weather
+                _this.currentWeather = res;
+                _this.chosenWeather = res;
+                // fetch weather forecast for this location
+                _this.fetchWeatherForecast(_this.chosenLocation);
+                // re render leaflet map of chosen geolocation
+                _this.markerPos = [_this.chosenLocation.lat, _this.chosenLocation.long];
+                _this.renderLeafletMap(_this.chosenLocation.lat, _this.chosenLocation.long);
+            }
+        })["catch"](function (err) { return alert(err); });
     };
+    /**
+     * fetch weather information of current geolocation
+     */
     App.prototype.onUseLocation = function () {
         var _this = this;
-        // fetch weather information of current geolocation
         fetch("http://localhost:9000/weather/" + this.currentLocation.lat + "/" + this.currentLocation.long)
             .then(function (res) { return res.json(); })
             .then(function (res) {
-            // render weather module
-            _this.renderWeather(res);
-            // set chosen location to current location
-            // this.chosenLocation = this.currentLocation;
-            // re render leaflet map of current geolocation
-            _this.markerPos = [_this.currentLocation.lat, _this.currentLocation.long];
-            _this.renderLeafletMap(_this.currentLocation.lat, _this.currentLocation.long);
-        })["catch"](function (err) { return err; });
+            // serverside error
+            if (res.error) {
+                alert("Error: " + res.error);
+            }
+            else {
+                // reset next steps if user has picked a new location
+                if (_this.weatherSection != react_1["default"].createElement(react_1["default"].Fragment, null))
+                    _this.resetToStep(1);
+                // assign current and chosen weather
+                _this.currentWeather = res;
+                _this.chosenWeather = res;
+                _this.chosenWeather.index = 0;
+                // fetch weather forecast for this location
+                _this.fetchWeatherForecast(_this.currentLocation);
+                // re render leaflet map of current geolocation
+                _this.markerPos = [_this.currentLocation.lat, _this.currentLocation.long];
+                _this.renderLeafletMap(_this.currentLocation.lat, _this.currentLocation.long);
+            }
+        });
     };
+    /**
+     * fetch weather information of geolocation clicked by user using map
+     * @param e: coordinates of clicked location
+     */
     App.prototype.onMapClicked = function (e) {
         var _this = this;
+        // update marker position and chosen location variables
         this.markerPos = e.latlng;
         this.chosenLocation.lat = e.latlng.lat;
         this.chosenLocation.long = e.latlng.lng;
-        // fetch weather information from chosen location coordinates
+        // reset next steps if user has picked a new location
+        if (this.weatherSection != react_1["default"].createElement(react_1["default"].Fragment, null))
+            this.resetToStep(1);
         fetch("http://localhost:9000/weather/" + this.chosenLocation.lat + "/" + this.chosenLocation.long)
             .then(function (res) { return res.json(); })
             .then(function (res) {
-            // update chosen city and country from geolocation
-            _this.chosenLocation.city = res.city;
-            _this.chosenLocation.country = res.country;
-            // render weather module
-            _this.renderWeather(res);
-            // re render leaflet map of current geolocation
-            _this.renderLeafletMap(_this.chosenLocation.lat, _this.chosenLocation.long);
-        })["catch"](function (err) { return err; });
+            // serverside error
+            if (res.error) {
+                alert("Error: " + res.error);
+            }
+            else {
+                // update chosen city and country from geolocation
+                _this.chosenLocation.city = res.city;
+                _this.chosenLocation.country = res.country;
+                // assign current and chosen weather
+                _this.currentWeather = res;
+                _this.chosenWeather = res;
+                // re render leaflet map of current geolocation
+                _this.renderLeafletMap(_this.chosenLocation.lat, _this.chosenLocation.long);
+                // fetch weather forecast for this location
+                _this.fetchWeatherForecast(_this.chosenLocation);
+            }
+        });
     };
     App.prototype.setChosenCity = function (city) {
         this.chosenLocation.city = city;
     };
     /****************************** WEATHER ******************************/
-    // private fetchWeatherHistory(city:string) {
-    //   console.log("fetching weather history");
-    //   fetch(`http://localhost:9000/weather/history/${city}`)
-    //   .then(res => res.json())
-    //   .then(res => this.renderWeatherWeek(res))
-    //   .catch(err => console.log(err))
-    // }
-    App.prototype.renderWeather = function (details) {
-        this.weather = details;
-        // let {city, country, iconCode, weather, description, temp} = details;
-        var iconUrl = "http://openweathermap.org/img/wn/" + this.weather.iconCode + "@2x.png";
-        this.weatherSection = (react_1["default"].createElement(Fade_1["default"], { right: true },
-            react_1["default"].createElement("div", { className: "weather-section" },
-                react_1["default"].createElement(semantic_ui_react_1.Header, { className: "weather-header", as: "h1" },
-                    this.weather.city,
-                    ", ",
-                    this.weather.country),
-                react_1["default"].createElement("img", { className: "weather-icon", src: iconUrl }),
-                this.weather.main,
-                react_1["default"].createElement("br", null),
-                this.weather.description,
-                react_1["default"].createElement("br", null),
-                this.weather.temp,
-                react_1["default"].createElement("br", null))));
+    /**
+     * fetch weather forecast for the next 7 days of given location
+     * @param location
+     */
+    App.prototype.fetchWeatherForecast = function (location) {
+        var _this = this;
+        // clear old forecasts;
+        this.forecast = [];
+        fetch("http://localhost:9000/weather/forecast/" + location.lat + "/" + location.long)
+            .then(function (res) { return res.json(); })
+            .then(function (res) {
+            // serverside error
+            if (res.error) {
+                alert("Error: " + res.error);
+            }
+            // assign results to forecast array
+            res.forEach(function (day, i) {
+                _this.forecast.push({
+                    index: i + 1,
+                    date: day.date,
+                    id: day.id,
+                    city: location.city,
+                    country: location.country,
+                    iconCode: day.iconCode,
+                    main: day.main,
+                    description: day.description,
+                    temp: day.temp,
+                    clouds: day.clouds
+                });
+            });
+            // render weather section with no chosen index
+            _this.renderWeatherSection(-1);
+        });
+    };
+    App.prototype.onSetChosenWeather = function (weather) {
+        this.chosenWeather = weather;
+        this.renderWeatherSection(weather.index);
         this.renderAskSection();
     };
-    App.prototype.renderWeatherWeek = function (details) {
-        console.log("rendering weather week");
-        var city = details.city, country = details.country, iconCode = details.iconCode, weather = details.weather, description = details.description, temp = details.temp;
-        var iconUrl = "http://openweathermap.org/img/wn/" + iconCode + "@2x.png";
-        this.weatherSection = (react_1["default"].createElement(Fade_1["default"], { right: true },
-            react_1["default"].createElement("div", { className: "weather-section" },
-                react_1["default"].createElement(semantic_ui_react_1.Header, { className: "weather-header", as: "h1" },
-                    city,
-                    ", ",
-                    country),
-                react_1["default"].createElement("img", { className: "weather-icon", src: iconUrl }),
-                weather,
-                react_1["default"].createElement("br", null),
-                description,
-                react_1["default"].createElement("br", null),
-                temp,
-                react_1["default"].createElement("br", null))));
-        this.forceUpdate();
-    };
     /********************************* PLAYLIST *********************************/
+    /**
+     * updates playlist option from dropdown inputs to value
+     * @param option: market or number of tracks
+     * @param event: new value
+     */
     App.prototype.setPlaylistOptionDropdown = function (option, event) {
-        // changes market or number of tracks
         this.playlistOptions[option] = event.value;
     };
+    /**
+     * updates playlist publicity option
+     * @param event: true or false
+     */
     App.prototype.setPlaylistPublic = function (event) {
-        // changes public boolean
         this.playlistOptions.public = event.checked;
     };
+    /**
+     * updates playlist option from text inputs to value, updates to "default" if left blank
+     * @param option: playlist name or description
+     * @param event: new value
+     */
     App.prototype.setPlaylistOptionInput = function (option, event) {
-        // changes playlist name or description
         this.playlistOptions[option] = event.target.value;
         this.playlistOptions[option] = (this.playlistOptions[option] == "") ? "default" : this.playlistOptions[option];
     };
+    /**
+     * fetches new playlist from chosen weather
+     * @param customised: true or false
+     */
     App.prototype.makePlaylist = function (customised) {
         var _this = this;
-        console.log((customised) ? "making customised" : "making default");
-        console.log("market", this.playlistOptions.countryMarket);
-        console.log("description", this.playlistOptions.description);
-        console.log("name", this.playlistOptions.name);
-        console.log("numOfTracks", this.playlistOptions.numOfTracks);
-        console.log("public", this.playlistOptions.public);
-        //default: create/id/main/description/temp/city/clouds/user/accessToken
-        //custom: create/name/pdesc/tracks/market/public/id/main/description/temp/city/clouds/user/accessToken
-        ///:name/:playlistDesc/:numTracks/:market/:makePublic/
-        ///:id/:main/:weatherDesc/:temp/:city/:clouds/
-        ///:user/:accessToken
         if (customised) {
             fetch("http://localhost:9000/create/" +
                 (this.playlistOptions.name + "/" + this.playlistOptions.description + "/" + this.playlistOptions.numOfTracks + "/" + this.playlistOptions.countryMarket + "/" + this.playlistOptions.public + "/") +
-                (this.weather.id + "/" + this.weather.main + "/" + this.weather.description + "/" + this.weather.temp.split('°')[0] + "/" + this.weather.city + "/" + this.weather.clouds + "/") +
+                (this.chosenWeather.id + "/" + this.chosenWeather.main + "/" + this.chosenWeather.description + "/" + this.chosenWeather.temp.split('°')[0] + "/" + this.chosenWeather.city + "/" + this.chosenWeather.clouds + "/") +
                 (this.spotify.userId + "/" + this.spotify.accessToken))
                 .then(function (res) { return res.text(); })
-                .then(function (res) { return _this.setOutput(res); })["catch"](function (err) { return err; });
+                .then(function (res) {
+                // case where country market doesn't exist
+                if (res.includes("400")) {
+                    alert(res);
+                    _this.resetToStep(3);
+                }
+                // case where access token has expired or user id is invalid
+                else if (res.includes("Account Error")) {
+                    _this.tokenExpired = true;
+                    alert(res);
+                }
+                // other spotify related error
+                else if (res.includes("Error")) {
+                    alert(res);
+                }
+                else {
+                    _this.setPlaylist(res);
+                }
+            });
         }
         else {
-            fetch("http://localhost:9000/create/" + this.weather.id + "/" + this.weather.main + "/" + this.weather.description + "/" + this.weather.temp.split('°')[0] + "/" + this.weather.city + "/" + this.weather.clouds + "/" + this.spotify.userId + "/" + this.spotify.accessToken)
+            this.resetToStep(3);
+            fetch("http://localhost:9000/create/" +
+                (this.chosenWeather.id + "/" + this.chosenWeather.main + "/" + this.chosenWeather.description + "/" + this.chosenWeather.temp.split('°')[0] + "/" + this.chosenWeather.city + "/" + this.chosenWeather.clouds + "/") +
+                (this.spotify.userId + "/" + this.spotify.accessToken))
                 .then(function (res) { return res.text(); })
-                .then(function (res) { return _this.setOutput(res); })["catch"](function (err) { return err; });
+                .then(function (res) {
+                // case where access token has expired or user id is invalid
+                if (res.includes("Account Error")) {
+                    _this.tokenExpired = true;
+                    alert(res);
+                }
+                // other spotify related error
+                else if (res.includes("Error")) {
+                    alert(res);
+                }
+                else {
+                    _this.setPlaylist(res);
+                }
+            });
         }
     };
-    App.prototype.setOutput = function (value) {
+    App.prototype.setPlaylist = function (value) {
         this.spotify.playlistId = value;
-        this.renderSpotifyPlaylist();
+        this.renderPlaylistSection();
     };
-    /****************************** LEAFLET ******************************/
+    /****************************** RENDER APP ******************************/
+    App.prototype.componentDidMount = function () {
+        // check access_token
+        this.loggedIn = (window.location.pathname.split("/")[1] == "") ? false : true;
+        console.log("Logged in:", this.loggedIn);
+        if (this.loggedIn) {
+            this.setSpotifyDetails();
+            this.getCurrentLocation();
+        }
+    };
+    App.prototype.componentDidUpdate = function () {
+        // if user has selected a location, scroll page to bottom to show next steps
+        if (this.nextSteps) {
+            this.scrollToBottom();
+        }
+    };
+    App.prototype.scrollToBottom = function () {
+        var _a;
+        return (_a = this.footer) === null || _a === void 0 ? void 0 : _a.scrollIntoView({ behavior: 'smooth' });
+    };
+    App.prototype.resetToStep = function (step) {
+        // reset to customise option section
+        if (step <= 4) {
+            this.playlistSection = react_1["default"].createElement(react_1["default"].Fragment, null);
+        }
+        // reset to ask customise section
+        if (step <= 3) {
+            this.playlistOptions = {
+                name: "default",
+                description: "default",
+                numOfTracks: "default",
+                countryMarket: "default",
+                public: false
+            };
+            this.customiseSection = react_1["default"].createElement(react_1["default"].Fragment, null);
+            // this.playlistSection = <></>;
+        }
+        // reset to weather forecast section
+        if (step <= 2) {
+            this.askCustomiseSection = react_1["default"].createElement(react_1["default"].Fragment, null);
+        }
+        // reset to location section 
+        if (step <= 1) {
+            this.forecast = [];
+            this.weatherSection = react_1["default"].createElement(react_1["default"].Fragment, null);
+        }
+    };
+    App.prototype.keyPressed = function (e) {
+        if (e.key == "Enter") {
+            this.onSearch();
+        }
+    };
     App.prototype.renderLeafletMap = function (lat, long) {
         var _this = this;
         var mapCenter = [lat, long];
         var zoomLevel = 8;
         this.leafletMap =
-            react_1["default"].createElement(react_1["default"].Fragment, null,
-                react_1["default"].createElement(semantic_ui_react_1.Label, { pointing: "below" }, "Click on a spot"),
+            react_1["default"].createElement("div", { className: "map" },
+                react_1["default"].createElement(semantic_ui_react_1.Label, { pointing: "below" }, "you can click on the map to pick a location!"),
                 react_1["default"].createElement(react_leaflet_1.Map, { center: mapCenter, zoom: zoomLevel, onclick: function (e) { return _this.onMapClicked(e); } },
                     react_1["default"].createElement(react_leaflet_1.TileLayer, { attribution: '\u00A9 <a href="http://osm.org/copyright">OpenStreetMap</a> contributors', url: 'http://{s}.tile.osm.org/{z}/{x}/{y}.png' }),
                     react_1["default"].createElement(react_leaflet_1.Marker, { position: this.markerPos },
@@ -285,46 +424,82 @@ var App = /** @class */ (function (_super) {
                                 mapCenter[0],
                                 react_1["default"].createElement("br", null),
                                 mapCenter[1])))));
+        this.renderLocationSection();
     };
-    /****************************** RENDER APP ******************************/
-    App.prototype.componentDidMount = function () {
-        // check access_token
-        this.loggedIn = (window.location.pathname.split("/")[1] == "") ? false : true;
-        console.log("logged in", this.loggedIn);
-        // var req = new XMLHttpRequest();
-        // req.open('GET', window.location.pathname, false);
-        // req.send(null);
-        // var headers = req.getAllResponseHeaders().toLowerCase();
-        if (this.loggedIn) {
-            this.setSpotifyDetails();
-            // this.getCurrentLocation(false);
-            this.getCurrentLocation();
-            // this.renderLeafletMap(true);
-            this.renderLocationOptions();
-            // this.renderAskSection();
-        }
-    };
-    App.prototype.renderLocationOptions = function () {
+    App.prototype.renderLocationSection = function () {
         var _this = this;
-        this.locationSection = (react_1["default"].createElement(react_1["default"].Fragment, null,
-            react_1["default"].createElement(semantic_ui_react_1.Header, null, "Step 1. Choose a location "),
-            react_1["default"].createElement("div", { className: "location-options" },
-                react_1["default"].createElement(semantic_ui_react_1.Input, { className: "location-input", placeholder: "Enter city name", onChange: function (event) { return _this.setChosenCity(event.target.value); } }),
-                react_1["default"].createElement(semantic_ui_react_1.Button, { primary: true, className: "search-location-btn", onClick: function () { return _this.onSearch(); } }, "Search"),
-                react_1["default"].createElement(semantic_ui_react_1.Button, { className: "use-location-btn", onClick: function () { return _this.onUseLocation(); } }, "Use my location"))));
+        this.locationSection = (react_1["default"].createElement(Fade_1["default"], { top: true },
+            react_1["default"].createElement("section", { className: "step-card" },
+                react_1["default"].createElement("div", { className: "step-title" },
+                    react_1["default"].createElement(semantic_ui_react_1.Header, { className: "step-header" }, "location")),
+                react_1["default"].createElement("div", { className: "step location" },
+                    react_1["default"].createElement("div", { className: "location-section" },
+                        react_1["default"].createElement("div", { className: "location-options" },
+                            react_1["default"].createElement(semantic_ui_react_1.Input, { className: "location-input", placeholder: "Enter city name", onKeyDown: function (e) { return _this.keyPressed(e); }, onChange: function (event) { return _this.setChosenCity(event.target.value); } }),
+                            react_1["default"].createElement(semantic_ui_react_1.Button, { primary: true, className: "search-location-btn", onClick: function () { return _this.onSearch(); } }, "Search"),
+                            react_1["default"].createElement(semantic_ui_react_1.Button, { secondary: true, className: "use-location-btn", onClick: function () { return _this.onUseLocation(); } }, "Use my location")),
+                        this.leafletMap)))));
+    };
+    App.prototype.renderWeatherSection = function (chosen) {
+        var _this = this;
+        this.nextSteps = true;
+        if (this.askCustomiseSection != react_1["default"].createElement(react_1["default"].Fragment, null))
+            this.resetToStep(2);
+        var header = (this.currentWeather.country == "") ? "Unknown Place" : this.currentWeather.city + ", " + this.currentWeather.country;
+        var todayIcon = "http://openweathermap.org/img/wn/" + this.currentWeather.iconCode + "@2x.png";
+        var dailyWeather = [];
+        var classNames = ["", "", "", "", "", "", "", ""];
+        // determine class name of each card depending on if they are the chosen weather
+        for (var i = 0; i < 8; i++) {
+            if (i == chosen) {
+                classNames[i] = "weather-card selected";
+            }
+            else {
+                classNames[i] = "weather-card";
+            }
+        }
+        dailyWeather.push(react_1["default"].createElement(Fade_1["default"], { top: true },
+            react_1["default"].createElement("div", { className: classNames[0], onClick: function () { return _this.onSetChosenWeather(_this.currentWeather); } },
+                react_1["default"].createElement(semantic_ui_react_1.Header, { className: "title", as: "h3" }, "Today"),
+                react_1["default"].createElement("img", { className: "icon", src: todayIcon }),
+                react_1["default"].createElement("div", { className: "main" }, this.currentWeather.main),
+                react_1["default"].createElement("div", { className: "description" }, this.currentWeather.description),
+                react_1["default"].createElement("div", { className: "temp" }, this.currentWeather.temp))));
+        this.forecast.forEach(function (day, i) {
+            var icon = "http://openweathermap.org/img/wn/" + day.iconCode + "@2x.png";
+            dailyWeather.push(react_1["default"].createElement(Fade_1["default"], { top: true },
+                react_1["default"].createElement("div", { className: classNames[i + 1], onClick: function () { return _this.onSetChosenWeather(day); } },
+                    react_1["default"].createElement(semantic_ui_react_1.Header, { className: "title", as: "h3" }, day.date),
+                    react_1["default"].createElement("img", { className: "icon", src: icon }),
+                    react_1["default"].createElement("div", { className: "main" }, day.main),
+                    react_1["default"].createElement("div", { className: "description" }, day.description),
+                    react_1["default"].createElement("div", { className: "temp" }, day.temp))));
+        });
+        this.weatherSection = (react_1["default"].createElement(Fade_1["default"], { top: true },
+            react_1["default"].createElement("section", { className: "step-card" },
+                react_1["default"].createElement("div", { className: "step-title" },
+                    react_1["default"].createElement(semantic_ui_react_1.Header, { className: "step-header" }, "weather")),
+                react_1["default"].createElement("div", { className: "step weather" },
+                    react_1["default"].createElement("div", { className: "weather-section" },
+                        react_1["default"].createElement(semantic_ui_react_1.Header, { className: "weather-header", as: "h1" }, header),
+                        react_1["default"].createElement("div", { className: "weather-cards" }, dailyWeather))))));
     };
     App.prototype.renderAskSection = function () {
         var _this = this;
         this.askCustomiseSection = (react_1["default"].createElement(Fade_1["default"], { top: true },
-            react_1["default"].createElement("section", { className: "step ask" },
-                react_1["default"].createElement("div", { className: "customize-question" },
-                    react_1["default"].createElement(semantic_ui_react_1.Header, { className: "question" }, "Would you like to customise the playlist?"),
-                    react_1["default"].createElement("div", { className: "buttons" },
-                        react_1["default"].createElement(semantic_ui_react_1.Button, { onClick: function () { return _this.renderPlaylistOptions(); } }, "Yes"),
-                        react_1["default"].createElement(semantic_ui_react_1.Button, { onClick: function () { return _this.makePlaylist(false); }, primary: true }, " No, make my playlist!"))))));
+            react_1["default"].createElement("section", { className: "step-card" },
+                react_1["default"].createElement("div", { className: "step ask" },
+                    react_1["default"].createElement("div", { className: "customize-question" },
+                        react_1["default"].createElement(semantic_ui_react_1.Header, { className: "question" }, "Would you like to customise the playlist?"),
+                        react_1["default"].createElement("div", { className: "buttons" },
+                            react_1["default"].createElement(semantic_ui_react_1.Button, { onClick: function () { return _this.renderCustomiseSection(); }, secondary: true }, "Yes"),
+                            react_1["default"].createElement(semantic_ui_react_1.Button, { onClick: function () { return _this.makePlaylist(false); }, primary: true }, " No, make my playlist!")))))));
     };
-    App.prototype.renderPlaylistOptions = function () {
+    App.prototype.renderCustomiseSection = function () {
         var _this = this;
+        // reset playlist section if user changes their customise answer
+        if (this.playlistSection != react_1["default"].createElement(react_1["default"].Fragment, null))
+            this.resetToStep(4);
         var numTracks = [];
         var countryMarket = [
             { key: 0, text: "(" + this.currentLocation.country + ") Market", value: this.currentLocation.country }
@@ -336,42 +511,46 @@ var App = /** @class */ (function (_super) {
             numTracks.push({ key: i, text: i, value: i });
         }
         this.customiseSection = (react_1["default"].createElement(Fade_1["default"], { top: true },
-            react_1["default"].createElement("section", { className: "step customise" },
-                react_1["default"].createElement(semantic_ui_react_1.Header, null, "Step 2. Customise Playlist Options"),
-                react_1["default"].createElement("div", { className: "playlist-options" },
-                    react_1["default"].createElement(semantic_ui_react_1.Input, { className: "playlist-input", label: "Name", labelPosition: "left", onChange: function (e) { return _this.setPlaylistOptionInput("name", e); } }),
-                    react_1["default"].createElement(semantic_ui_react_1.Input, { className: "playlist-input", label: "Description", labelPosition: "left", onChange: function (e) { return _this.setPlaylistOptionInput("description", e); } }),
-                    react_1["default"].createElement("div", { className: "last-row" },
-                        react_1["default"].createElement("div", { className: "other-options" },
-                            react_1["default"].createElement(semantic_ui_react_1.Dropdown, { className: "playlist-size", placeholder: "Number of tracks", selection: true, options: numTracks, onChange: function (e, value) { return _this.setPlaylistOptionDropdown("numOfTracks", value); } }),
-                            react_1["default"].createElement(semantic_ui_react_1.Dropdown, { className: "playlist-market", placeholder: "Country Market", selection: true, options: countryMarket, onChange: function (e, value) { return _this.setPlaylistOptionDropdown("countryMarket", value); } }),
-                            react_1["default"].createElement("div", { className: "public-div" },
-                                react_1["default"].createElement(semantic_ui_react_1.Label, { className: "public-label" }, "Make Public?"),
-                                react_1["default"].createElement(semantic_ui_react_1.Checkbox, { className: "playlist-public", toggle: true, onChange: function (e, checked) { return _this.setPlaylistPublic(checked); } }))),
-                        react_1["default"].createElement(semantic_ui_react_1.Button, { onClick: function () { return _this.makePlaylist(true); }, className: "make-btn", primary: true }, "Make playlist"))))));
+            react_1["default"].createElement("section", { className: "step-card" },
+                react_1["default"].createElement("div", { className: "step-title" },
+                    react_1["default"].createElement(semantic_ui_react_1.Header, { className: "step-header" }, "options")),
+                react_1["default"].createElement("div", { className: "step customise" },
+                    react_1["default"].createElement("div", { className: "playlist-options" },
+                        react_1["default"].createElement(semantic_ui_react_1.Input, { className: "playlist-input", label: "Name", labelPosition: "left", onChange: function (e) { return _this.setPlaylistOptionInput("name", e); } }),
+                        react_1["default"].createElement(semantic_ui_react_1.Input, { className: "playlist-input", label: "Description", labelPosition: "left", onChange: function (e) { return _this.setPlaylistOptionInput("description", e); } }),
+                        react_1["default"].createElement("div", { className: "last-row" },
+                            react_1["default"].createElement("div", { className: "other-options" },
+                                react_1["default"].createElement(semantic_ui_react_1.Dropdown, { className: "playlist-size", placeholder: "Number of tracks", selection: true, options: numTracks, onChange: function (e, value) { return _this.setPlaylistOptionDropdown("numOfTracks", value); } }),
+                                react_1["default"].createElement(semantic_ui_react_1.Dropdown, { className: "playlist-market", placeholder: "Country Market", selection: true, options: countryMarket, onChange: function (e, value) { return _this.setPlaylistOptionDropdown("countryMarket", value); } }),
+                                react_1["default"].createElement("div", { className: "public-div" },
+                                    react_1["default"].createElement(semantic_ui_react_1.Label, { className: "public-label" }, "Make Public?"),
+                                    react_1["default"].createElement(semantic_ui_react_1.Checkbox, { className: "playlist-public", toggle: true, onChange: function (e, checked) { return _this.setPlaylistPublic(checked); } }))),
+                            react_1["default"].createElement(semantic_ui_react_1.Button, { onClick: function () { return _this.makePlaylist(true); }, className: "make-btn", primary: true }, "Make playlist")))))));
     };
-    App.prototype.renderSpotifyPlaylist = function () {
-        this.playlistSection = (react_1["default"].createElement("section", { className: "step" },
-            react_1["default"].createElement("iframe", { src: "https://open.spotify.com/embed/playlist/" + this.spotify.playlistId, width: "300", height: "380", frameBorder: "0", allowTransparency: true, allow: "encrypted-media" })));
+    App.prototype.renderPlaylistSection = function () {
+        this.playlistSection = (react_1["default"].createElement("section", { className: "step-card" },
+            react_1["default"].createElement("div", { className: "step-title" },
+                react_1["default"].createElement(semantic_ui_react_1.Header, { className: "step-header" }, "playlist!")),
+            react_1["default"].createElement("div", { className: "step playlist" },
+                react_1["default"].createElement("iframe", { className: "spotify", src: "https://open.spotify.com/embed/playlist/" + this.spotify.playlistId, frameBorder: "0", allowTransparency: true, allow: "encrypted-media" }))));
     };
     App.prototype.render = function () {
-        if (this.loggedIn) {
-            console.log("current", this.currentLocation.country);
-            console.log("chosen", this.chosenLocation.country);
+        var _this = this;
+        // render main page if user has logged in to spotify
+        if (this.loggedIn && !this.tokenExpired) {
             return (react_1["default"].createElement("div", { className: "main-page" },
                 react_1["default"].createElement("div", { className: "header-div" },
                     react_1["default"].createElement("img", { className: "header-img", src: cloud_logo_png_1["default"] }),
                     react_1["default"].createElement(semantic_ui_react_1.Header, { className: "main-header", as: 'h1' }, "sounds n clouds")),
                 react_1["default"].createElement("div", { className: "body-div" },
-                    react_1["default"].createElement("section", { className: "step location" },
-                        react_1["default"].createElement("div", { className: "location-section" },
-                            this.locationSection,
-                            react_1["default"].createElement("div", { className: "map" }, this.leafletMap)),
-                        this.weatherSection),
+                    this.locationSection,
+                    this.weatherSection,
                     this.askCustomiseSection,
                     this.customiseSection,
-                    this.playlistSection)));
+                    this.playlistSection),
+                react_1["default"].createElement("div", { className: "footer-div", ref: function (el) { _this.footer = el; } })));
         }
+        // render log in page
         else {
             return (react_1["default"].createElement("div", { className: "login-page" },
                 react_1["default"].createElement("div", { className: "header-div" },
@@ -391,7 +570,13 @@ var App = /** @class */ (function (_super) {
     ], App.prototype, "playlistOptions");
     __decorate([
         mobx_1.observable
-    ], App.prototype, "weather");
+    ], App.prototype, "currentWeather");
+    __decorate([
+        mobx_1.observable
+    ], App.prototype, "forecast");
+    __decorate([
+        mobx_1.observable
+    ], App.prototype, "chosenWeather");
     __decorate([
         mobx_1.observable
     ], App.prototype, "currentLocation");
@@ -406,10 +591,13 @@ var App = /** @class */ (function (_super) {
     ], App.prototype, "markerPos");
     __decorate([
         mobx_1.observable
-    ], App.prototype, "currentLocationClicked");
+    ], App.prototype, "loggedIn");
     __decorate([
         mobx_1.observable
-    ], App.prototype, "spotifyOutput");
+    ], App.prototype, "nextSteps");
+    __decorate([
+        mobx_1.observable
+    ], App.prototype, "tokenExpired");
     __decorate([
         mobx_1.observable
     ], App.prototype, "leafletMap");
@@ -430,10 +618,7 @@ var App = /** @class */ (function (_super) {
     ], App.prototype, "weatherSection");
     __decorate([
         mobx_1.observable
-    ], App.prototype, "spotifyToken");
-    __decorate([
-        mobx_1.observable
-    ], App.prototype, "loggedIn");
+    ], App.prototype, "footer");
     __decorate([
         mobx_1.action
     ], App.prototype, "setSpotifyDetails");
@@ -454,10 +639,7 @@ var App = /** @class */ (function (_super) {
     ], App.prototype, "setChosenCity");
     __decorate([
         mobx_1.action
-    ], App.prototype, "renderWeather");
-    __decorate([
-        mobx_1.action
-    ], App.prototype, "renderWeatherWeek");
+    ], App.prototype, "onSetChosenWeather");
     __decorate([
         mobx_1.action
     ], App.prototype, "setPlaylistOptionDropdown");
@@ -469,22 +651,22 @@ var App = /** @class */ (function (_super) {
     ], App.prototype, "setPlaylistOptionInput");
     __decorate([
         mobx_1.action
-    ], App.prototype, "setOutput");
+    ], App.prototype, "setPlaylist");
     __decorate([
         mobx_1.action
-    ], App.prototype, "renderLeafletMap");
+    ], App.prototype, "renderLocationSection");
     __decorate([
         mobx_1.action
-    ], App.prototype, "renderLocationOptions");
+    ], App.prototype, "renderWeatherSection");
     __decorate([
         mobx_1.action
     ], App.prototype, "renderAskSection");
     __decorate([
         mobx_1.action
-    ], App.prototype, "renderPlaylistOptions");
+    ], App.prototype, "renderCustomiseSection");
     __decorate([
         mobx_1.action
-    ], App.prototype, "renderSpotifyPlaylist");
+    ], App.prototype, "renderPlaylistSection");
     App = __decorate([
         mobx_react_1.observer
     ], App);

@@ -449,7 +449,6 @@ class App extends Component{
   public componentDidMount() {
     // check access_token
     this.loggedIn = (window.location.pathname.split("/")[1] == "") ? false : true
-    console.log("Logged in:", this.loggedIn);
     
     if(this.loggedIn) {
       this.setSpotifyDetails();
@@ -483,7 +482,6 @@ class App extends Component{
         public:false
       };
       this.customiseSection = <></>;
-      // this.playlistSection = <></>;
     }
     // reset to weather forecast section
     if(step <= 2) {

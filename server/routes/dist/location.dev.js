@@ -31,7 +31,7 @@ router.get('/:lat/:long', function (req, res) {
       res.send(location);
     } else {
       res.send({
-        error: "invalid geolocation"
+        error: "invalid coordinates"
       });
     }
   });

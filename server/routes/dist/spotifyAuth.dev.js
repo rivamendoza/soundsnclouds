@@ -72,7 +72,6 @@ router.get("/callback", function _callee(req, res) {
                 }; // use the access token to access the Spotify Web API
 
                 request.get(options, function (error, response, body) {
-                  // console.log(body);
                   user_id = body.id;
                   res.redirect('http://localhost:3000/' + querystring.stringify({
                     access_token: access_token,

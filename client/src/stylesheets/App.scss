@@ -1,3 +1,8 @@
+/**
+* SCSS STYLING FOR LOGIN AND MAIN PAGES
+*/
+
+// styling for main page
 .main-page{
   background-image: url("./../assets/background.jpg");
 
@@ -87,7 +92,6 @@
           
           .search-location-btn{
             margin-right: 0.5%;
-            // width: 15%;
           }
   
           .use-location-btn {
@@ -99,8 +103,6 @@
           margin-top: 1%;
 
           .leaflet-container {
-            // cursor: crosshair !important;
-            // border: 2px solid rgba($color: #1C2023, $alpha:0.8);
             border-radius: 4px;
             height: 50em;
             width: 100%;
@@ -137,7 +139,6 @@
           width: 100%;
           display: flex;
           overflow-x: scroll;
-          // justify-content: center;
 
           .weather-card{
             width: 100%;
@@ -279,8 +280,8 @@
       margin-right: 3%;
       border-radius: 4px;
       padding: 2%;
-      background-color: rgba($color: #F5F5F5, $alpha: 0.8);
-      // transition: 4s;
+      background-color: rgba($color: #F5F5F5, $alpha: 0.6);
+      transition: 0.3s;
   
       &:hover{
         background-color: rgba($color: #F5F5F5, $alpha: 1);
@@ -349,10 +350,7 @@
   background-color: #6B949E !important;
 }
 
-// .ui.input>input{
-//   border: 2px solid rgba($color: #1C2023, $alpha:0.3) !important;
-// }
-
+// styling for login page
 .login-page {
   background-image: url("./../assets/background.jpg");
   height: 1000px;

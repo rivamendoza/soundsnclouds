@@ -1,3 +1,6 @@
+/**
+* SCSS STYLING FOR LOGIN AND MAIN PAGES
+*/
 .main-page {
   background-image: url("./../assets/background.jpg");
   width: 100%;
@@ -226,7 +229,8 @@
   margin-right: 3%;
   border-radius: 4px;
   padding: 2%;
-  background-color: rgba(245, 245, 245, 0.8);
+  background-color: rgba(245, 245, 245, 0.6);
+  transition: 0.3s;
 }
 .main-page .body-div .step:hover {
   background-color: whitesmoke;

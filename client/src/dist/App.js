@@ -361,7 +361,6 @@ var App = /** @class */ (function (_super) {
     App.prototype.componentDidMount = function () {
         // check access_token
         this.loggedIn = (window.location.pathname.split("/")[1] == "") ? false : true;
-        console.log("Logged in:", this.loggedIn);
         if (this.loggedIn) {
             this.setSpotifyDetails();
             this.getCurrentLocation();
@@ -392,7 +391,6 @@ var App = /** @class */ (function (_super) {
                 public: false
             };
             this.customiseSection = react_1["default"].createElement(react_1["default"].Fragment, null);
-            // this.playlistSection = <></>;
         }
         // reset to weather forecast section
         if (step <= 2) {

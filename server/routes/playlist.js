@@ -163,7 +163,7 @@ router.get('/:id/:main/:desc/:temp/:city/:clouds/:user/:accessToken', function (
       url: `https://api.spotify.com/v1/users/${user}/playlists`,
       body: {
         "name": `${main.toLowerCase()} in ${city.toLowerCase()}`,
-        "description": `currently a ${temp}°C with ${desc} kinda mood`,
+        "description": `a ${temp}°C with ${desc} kinda mood`,
         "public": false      
       },
       headers: {

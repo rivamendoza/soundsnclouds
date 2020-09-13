@@ -149,7 +149,7 @@ router.get('/:id/:main/:desc/:temp/:city/:clouds/:user/:accessToken', function (
       url: "https://api.spotify.com/v1/users/".concat(user, "/playlists"),
       body: {
         "name": "".concat(main.toLowerCase(), " in ").concat(city.toLowerCase()),
-        "description": "currently a ".concat(temp, "\xB0C with ").concat(desc, " kinda mood"),
+        "description": "a ".concat(temp, "\xB0C with ").concat(desc, " kinda mood"),
         "public": false
       },
       headers: {

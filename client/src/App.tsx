@@ -175,7 +175,7 @@ class App extends Component{
       this.markerPos = [this.currentLocation.lat, this.currentLocation.long];
 
       //fetch city and country of geolocation
-      fetch(`http://localhost:9000/location/${this.currentLocation.lat}/${this.currentLocation.long}`)
+      fetch(`http://localhost:3000/location/${this.currentLocation.lat}/${this.currentLocation.long}`)
         .then(res => res.json())
         .then(res => {
           // case of invalid geolocation
@@ -199,7 +199,7 @@ class App extends Component{
    */
   @action
   private onSearch() {
-    fetch(`http://localhost:9000/weather/${this.chosenLocation.city}`)
+    fetch(`http://localhost:3000/weather/${this.chosenLocation.city}`)
       .then(res => res.json())
       .then(res => {
         // serverside error
@@ -235,7 +235,7 @@ class App extends Component{
    */
   @action
   private onUseLocation(){
-    fetch(`http://localhost:9000/weather/${this.currentLocation.lat}/${this.currentLocation.long}`)
+    fetch(`http://localhost:3000/weather/${this.currentLocation.lat}/${this.currentLocation.long}`)
       .then(res => res.json())
       .then(res => {
           // serverside error
@@ -276,7 +276,7 @@ class App extends Component{
     // reset next steps if user has picked a new location
     if(this.weatherSection != <></>) this.resetToStep(1);
     
-    fetch(`http://localhost:9000/weather/${this.chosenLocation.lat}/${this.chosenLocation.long}`)
+    fetch(`http://localhost:3000/weather/${this.chosenLocation.lat}/${this.chosenLocation.long}`)
       .then(res => res.json())
       .then(res => {
           // serverside error
@@ -317,7 +317,7 @@ class App extends Component{
     // clear old forecasts;
     this.forecast = []; 
 
-    fetch(`http://localhost:9000/weather/forecast/${location.lat}/${location.long}`)
+    fetch(`http://localhost:3000/weather/forecast/${location.lat}/${location.long}`)
     .then(res => res.json())
     .then(res => {
       // serverside error
@@ -391,7 +391,7 @@ class App extends Component{
    */
   private makePlaylist(customised:boolean) {
     if(customised) {
-      fetch(`http://localhost:9000/create/`+
+      fetch(`http://localhost:3000/create/`+
               `${this.playlistOptions.name}/${this.playlistOptions.description}/${this.playlistOptions.numOfTracks}/${this.playlistOptions.countryMarket}/${this.playlistOptions.public}/` + 
               `${this.chosenWeather.id}/${this.chosenWeather.main}/${this.chosenWeather.description}/${this.chosenWeather.temp.split('°')[0]}/${this.chosenWeather.city}/${this.chosenWeather.clouds}/` + 
               `${this.spotify.userId}/${this.spotify.accessToken}`)
@@ -418,7 +418,7 @@ class App extends Component{
     }
     else {
       this.resetToStep(3)
-      fetch(`http://localhost:9000/create/`+
+      fetch(`http://localhost:3000/create/`+
             `${this.chosenWeather.id}/${this.chosenWeather.main}/${this.chosenWeather.description}/${this.chosenWeather.temp.split('°')[0]}/${this.chosenWeather.city}/${this.chosenWeather.clouds}/`+
             `${this.spotify.userId}/${this.spotify.accessToken}`)
       .then(res => res.text())
@@ -781,7 +781,7 @@ class App extends Component{
           <div className="login-body">
             <Label className={"login-blurb"} pointing="below">to use <i>sounds n clouds</i> you must log in to spotify :)</Label>
             <img className="login-gif" src={login_gif}></img>
-            <Button className="login-btn" onClick={() => window.location.href = "http://localhost:9000/auth/login"}>okay, log me in</Button>
+            <Button className="login-btn" onClick={() => window.location.href = "http://localhost:3000/auth/login"}>okay, log me in</Button>
           </div>
         </div>
       )

@@ -11,7 +11,7 @@ const querystring = require('querystring');
 // spotify api credentials
 const CLIENT_ID = 'c32e2b8a2a74444f9448149ddd2d22d8'; 
 const CLIENT_SECRET = 'bc1a9f6e6cb543278f55e30d25ea1b4a'; 
-const REDIRECT_URI = 'http://localhost:9000/auth/callback'; 
+const REDIRECT_URI = 'http://localhost:3000/auth/callback'; 
 
 const stateKey = 'spotify_auth_state';
 

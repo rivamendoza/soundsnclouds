@@ -15,7 +15,7 @@ var cookieParser = require('cookie-parser'); // spotify api credentials
 
 var CLIENT_ID = 'c32e2b8a2a74444f9448149ddd2d22d8';
 var CLIENT_SECRET = 'bc1a9f6e6cb543278f55e30d25ea1b4a';
-var REDIRECT_URI = 'http://localhost:9000/auth/callback';
+var REDIRECT_URI = 'http://localhost:3000/auth/callback';
 var stateKey = 'spotify_auth_state'; // router.use(cors());
 
 router.get('/login', function (req, res) {

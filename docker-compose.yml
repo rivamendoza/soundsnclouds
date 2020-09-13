@@ -3,11 +3,13 @@ services:
     client:
         build: ./client
         ports:
-            - "3000:3000"
+            - "3001:3000"
         stdin_open: true
-        depends_on: 
-            - server
+        # depends_on: 
+        #     - server
     server:
         build: ./server
         ports:
-            - "9000:9000"
+            - "3000:3000"
+        depends_on: 
+            - client

@@ -121,7 +121,7 @@ var App = /** @class */ (function (_super) {
             _this.currentLocation.long = parseFloat(position.coords.longitude.toPrecision());
             _this.markerPos = [_this.currentLocation.lat, _this.currentLocation.long];
             //fetch city and country of geolocation
-            fetch("http://localhost:9000/location/" + _this.currentLocation.lat + "/" + _this.currentLocation.long)
+            fetch("http://localhost:3000/location/" + _this.currentLocation.lat + "/" + _this.currentLocation.long)
                 .then(function (res) { return res.json(); })
                 .then(function (res) {
                 // case of invalid geolocation
@@ -143,7 +143,7 @@ var App = /** @class */ (function (_super) {
      */
     App.prototype.onSearch = function () {
         var _this = this;
-        fetch("http://localhost:9000/weather/" + this.chosenLocation.city)
+        fetch("http://localhost:3000/weather/" + this.chosenLocation.city)
             .then(function (res) { return res.json(); })
             .then(function (res) {
             // serverside error
@@ -174,7 +174,7 @@ var App = /** @class */ (function (_super) {
      */
     App.prototype.onUseLocation = function () {
         var _this = this;
-        fetch("http://localhost:9000/weather/" + this.currentLocation.lat + "/" + this.currentLocation.long)
+        fetch("http://localhost:3000/weather/" + this.currentLocation.lat + "/" + this.currentLocation.long)
             .then(function (res) { return res.json(); })
             .then(function (res) {
             // serverside error
@@ -210,7 +210,7 @@ var App = /** @class */ (function (_super) {
         // reset next steps if user has picked a new location
         if (this.weatherSection != react_1["default"].createElement(react_1["default"].Fragment, null))
             this.resetToStep(1);
-        fetch("http://localhost:9000/weather/" + this.chosenLocation.lat + "/" + this.chosenLocation.long)
+        fetch("http://localhost:3000/weather/" + this.chosenLocation.lat + "/" + this.chosenLocation.long)
             .then(function (res) { return res.json(); })
             .then(function (res) {
             // serverside error
@@ -243,7 +243,7 @@ var App = /** @class */ (function (_super) {
         var _this = this;
         // clear old forecasts;
         this.forecast = [];
-        fetch("http://localhost:9000/weather/forecast/" + location.lat + "/" + location.long)
+        fetch("http://localhost:3000/weather/forecast/" + location.lat + "/" + location.long)
             .then(function (res) { return res.json(); })
             .then(function (res) {
             // serverside error
@@ -306,7 +306,7 @@ var App = /** @class */ (function (_super) {
     App.prototype.makePlaylist = function (customised) {
         var _this = this;
         if (customised) {
-            fetch("http://localhost:9000/create/" +
+            fetch("http://localhost:3000/create/" +
                 (this.playlistOptions.name + "/" + this.playlistOptions.description + "/" + this.playlistOptions.numOfTracks + "/" + this.playlistOptions.countryMarket + "/" + this.playlistOptions.public + "/") +
                 (this.chosenWeather.id + "/" + this.chosenWeather.main + "/" + this.chosenWeather.description + "/" + this.chosenWeather.temp.split('°')[0] + "/" + this.chosenWeather.city + "/" + this.chosenWeather.clouds + "/") +
                 (this.spotify.userId + "/" + this.spotify.accessToken))
@@ -333,7 +333,7 @@ var App = /** @class */ (function (_super) {
         }
         else {
             this.resetToStep(3);
-            fetch("http://localhost:9000/create/" +
+            fetch("http://localhost:3000/create/" +
                 (this.chosenWeather.id + "/" + this.chosenWeather.main + "/" + this.chosenWeather.description + "/" + this.chosenWeather.temp.split('°')[0] + "/" + this.chosenWeather.city + "/" + this.chosenWeather.clouds + "/") +
                 (this.spotify.userId + "/" + this.spotify.accessToken))
                 .then(function (res) { return res.text(); })
@@ -560,7 +560,7 @@ var App = /** @class */ (function (_super) {
                         react_1["default"].createElement("i", null, "sounds n clouds"),
                         " you must log in to spotify :)"),
                     react_1["default"].createElement("img", { className: "login-gif", src: login_gif_gif_1["default"] }),
-                    react_1["default"].createElement(semantic_ui_react_1.Button, { className: "login-btn", onClick: function () { return window.location.href = "http://localhost:9000/auth/login"; } }, "okay, log me in"))));
+                    react_1["default"].createElement(semantic_ui_react_1.Button, { className: "login-btn", onClick: function () { return window.location.href = "http://localhost:3000/auth/login"; } }, "okay, log me in"))));
         }
     };
     __decorate([

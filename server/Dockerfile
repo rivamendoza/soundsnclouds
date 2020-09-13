@@ -1,11 +1,11 @@
-FROM node:boron
+FROM node:8
 
-COPY . /src
+# WORKDIR /src
+COPY . package*.json ./
+# WORKDIR /src
 
-WORKDIR /src
+# RUN npm install
 
-RUN npm install
-
-EXPOSE 9000
+EXPOSE 3000
 
 CMD ["npm", "start"]

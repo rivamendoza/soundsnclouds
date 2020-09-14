@@ -157,11 +157,8 @@ class App extends Component{
    */
   @action
   private setSpotifyDetails() {
-    console.log("path: ", window.location.pathname);
     this.spotify.accessToken = window.location.pathname.split("/")[1].split("=")[1].split("&user_id")[0];
     this.spotify.userId = window.location.pathname.split("user_id=")[1];
-    console.log(this.spotify.accessToken);
-    console.log(this.spotify.userId);
   }
 
   /****************************** LOCATION ******************************/
@@ -174,7 +171,6 @@ class App extends Component{
       this.currentLocation.lat = parseFloat(position.coords.latitude.toPrecision());
       this.currentLocation.long = parseFloat(position.coords.longitude.toPrecision());
       this.markerPos = [this.currentLocation.lat, this.currentLocation.long];
-      console.log(`calling http://${this.hostName}:9000/location/${this.currentLocation.lat}/${this.currentLocation.long}`);
 
       //fetch city and country of geolocation
       fetch(`http://${this.hostName}:9000/location/${this.currentLocation.lat}/${this.currentLocation.long}`)
@@ -201,8 +197,6 @@ class App extends Component{
    */
   @action
   private onSearch() {
-    console.log(`calling http://${this.hostName}:9000/weather/${this.chosenLocation.city}`);
-
     fetch(`http://${this.hostName}:9000/weather/${this.chosenLocation.city}`)
       .then(res => res.json())
       .then(res => {
@@ -451,12 +445,9 @@ class App extends Component{
 
   /****************************** RENDER APP ******************************/
   public componentDidMount() {
-
     // check access_token
     this.loggedIn = (window.location.pathname.includes("access_token")) ? true : false
     
-    console.log("logged in: ", this.loggedIn);
-
     // start main application process if logged in
     if(this.loggedIn) {
       this.setSpotifyDetails();
@@ -761,7 +752,6 @@ class App extends Component{
   }
 
   render() {
-    console.log(window.location.hostname);
     // render main page if user has logged in to spotify
     if(this.loggedIn && !this.tokenExpired) {
       return (

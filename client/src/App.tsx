@@ -1,16 +1,16 @@
 import React, { Component } from 'react';
 import './stylesheets/App.scss';
+import 'react-widgets/dist/css/react-widgets.css';
+import 'semantic-ui-css/semantic.min.css'
 import login_gif from './assets/login-gif.gif';
 import logo from './assets/cloud-logo.png';
+import Fade from 'react-reveal/Fade';
 import { observable, action, observe } from "mobx";
 import { observer } from "mobx-react";
 import { Map, Marker, Popup, TileLayer } from 'react-leaflet';
 import { LatLngTuple } from 'leaflet';
-import { Input, Button, Label, Header, Dropdown, Checkbox, Modal } from 'semantic-ui-react'
-import Fade from 'react-reveal/Fade';
+import { Input, Button, Label, Header, Dropdown, Checkbox } from 'semantic-ui-react'
 
-import 'react-widgets/dist/css/react-widgets.css';
-import 'semantic-ui-css/semantic.min.css'
 
 export interface PlaylistProps{
   name:string;       
@@ -34,7 +34,6 @@ export interface WeatherProps{
 }
 
 export interface LocationProps{
-  useCoords: boolean; // location mode
   city:string;
   country:string;
   lat:number;
@@ -94,7 +93,6 @@ class App extends Component{
   // stores user's current location
   @observable
   private currentLocation:LocationProps = {
-    useCoords: false,
     city: "",
     country: "",
     lat: 0,
@@ -104,7 +102,6 @@ class App extends Component{
   // stores location chosen to get weather from
   @observable
   private chosenLocation:LocationProps = {
-    useCoords: false,
     city: "",
     country: "",
     lat: 0,
@@ -450,6 +447,7 @@ class App extends Component{
     // check access_token
     this.loggedIn = (window.location.pathname.split("/")[1] == "") ? false : true
     
+    // start main application process if logged in
     if(this.loggedIn) {
       this.setSpotifyDetails();
       this.getCurrentLocation();
@@ -504,21 +502,28 @@ class App extends Component{
     let mapCenter:LatLngTuple = [lat, long];
     let zoomLevel = 8;
 
-    this.leafletMap = 
-    <div className="map">
-      <Label pointing="below">you can click on the map to pick a location!</Label>
-      <Map center={mapCenter} zoom={zoomLevel} onclick={(e) => this.onMapClicked(e)}>
-          <TileLayer
-            attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-            url='http://{s}.tile.osm.org/{z}/{x}/{y}.png'
-          />
-          <Marker position={this.markerPos}>
-          <Popup>
-            <span>{mapCenter[0]}<br/>{mapCenter[1]}</span>
-          </Popup>
-        </Marker> 
-      </Map>
-    </div>
+    this.leafletMap = (
+      <div className="map">
+        <Label pointing="below">you can click on the map to pick a location!</Label>
+        <Map center={mapCenter} 
+              zoom={zoomLevel} 
+              onclick={(e) => this.onMapClicked(e)}
+              minZoom={3}
+              maxZoom={8}
+              bounceAtZoomLimits={true}
+        >
+            <TileLayer
+              attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+              url='http://{s}.tile.osm.org/{z}/{x}/{y}.png'
+            />
+            <Marker position={this.markerPos}>
+            <Popup>
+              <span>{mapCenter[0]}<br/>{mapCenter[1]}</span>
+            </Popup>
+          </Marker> 
+        </Map>
+      </div>
+    );
 
     this.renderLocationSection();
   }
@@ -526,45 +531,44 @@ class App extends Component{
   @action
   private renderLocationSection() {
     this.locationSection = (
-      <Fade top>
-        <section className="step-card">
-          <div className="step-title">
-            <Header className="step-header">location</Header>
+        <Fade top>
+          <section className="step-card">
+            <div className="step-title">
+              <Header className="step-header">location</Header>
+            </div>
+
+            <div className="step location">
+              <div className="location-section">
+                <div className="location-options">
+                  <Input
+                    className="location-input"
+                    placeholder={"Enter city name"}
+                    onKeyDown={(e) => this.keyPressed(e)}
+                    onChange={(event) => this.setChosenCity(event.target.value)}
+                  />
+
+                  <Button 
+                    primary={true} 
+                    className="search-location-btn" 
+                    onClick={() => this.onSearch()}
+                  >
+                  Search
+                  </Button>
+
+                  <Button 
+                    secondary={true}
+                    className="use-location-btn" 
+                    onClick={() => this.onUseLocation()}
+                  >
+                    Use my location
+                  </Button>              
+                </div>
+                {this.leafletMap}
+                
+            </div>
           </div>
-
-          <div className="step location">
-            <div className="location-section">
-              <div className="location-options">
-                <Input
-                  className="location-input"
-                  placeholder={"Enter city name"}
-                  onKeyDown={(e) => this.keyPressed(e)}
-                  onChange={(event) => this.setChosenCity(event.target.value)}
-                />
-
-                <Button 
-                  primary={true} 
-                  className="search-location-btn" 
-                  onClick={() => this.onSearch()}
-                >
-                Search
-                </Button>
-
-                <Button 
-                  secondary={true}
-                  className="use-location-btn" 
-                  onClick={() => this.onUseLocation()}
-                >
-                  Use my location
-                </Button>              
-              </div>
-              {this.leafletMap}
-              
-          </div>
-        </div>
-      </section>
-        
-    </Fade>
+        </section>
+      </Fade>
     );
   }
 

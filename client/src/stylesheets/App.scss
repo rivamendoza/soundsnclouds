@@ -35,6 +35,7 @@
       position: relative;
       left: 15px;
       margin-top: 0 !important;
+      margin-bottom: 1% !important;
       color: #F5F5F5 !important;
       text-align: center;
       font-style: italic;
@@ -64,7 +65,7 @@
           height: fit-content;
           width: fit-content;
           text-align: center;
-          right: 75%;
+          right: 70%;
           padding: 2%;
           white-space: nowrap;
         }
@@ -298,6 +299,71 @@
   }
 }
 
+
+// styling for login page
+.login-page {
+  background-image: url("./../assets/background.jpg");
+  height: 1000px;
+  width: 100%;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  background-size: cover;
+  position: fixed;
+  overflow: scroll;
+
+  .header-div {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    height: 80px;
+    align-self: center;
+    background-color: rgba($color: #1C2023, $alpha:1);
+    padding: 1%;
+    z-index: 10000;
+    display: flex;
+    clear: both;
+
+    .header-img {
+      height: 50px;
+    }
+    
+    .login-header{
+      position: relative;
+      left: 15px;
+      margin-top: 0 !important;
+      margin-bottom: 1% !important;
+      color: #F5F5F5 !important;
+      text-align: center;
+      font-style: italic;
+    }
+  }
+  
+  .login-body{
+    height: 90%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+    .login-blurb{
+      height: auto;
+      font-size: 20px;
+      margin: 1.5% 0 !important;
+    }
+
+    .login-gif{
+      border-radius: 4px;
+      width: 30%;
+      margin-bottom: 2%;
+    }
+  
+    .login-btn{
+      border-radius: 4px;
+      font-size:20px;
+    }
+  }
+}
+
 // semantic-ui change colors
 .ui.primary.button, .ui.primary.buttons .button {
   background-color: #1C2023 !important;
@@ -348,68 +414,4 @@
 
 .ui.pointing.label {
   background-color: #6B949E !important;
-}
-
-// styling for login page
-.login-page {
-  background-image: url("./../assets/background.jpg");
-  height: 1000px;
-  width: 100%;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-  background-size: cover;
-  position: fixed;
-  overflow: scroll;
-
-  .header-div {
-    position: fixed;
-    top: 0;
-    width: 100%;
-    height: 80px;
-    align-self: center;
-    background-color: rgba($color: #1C2023, $alpha:1);
-    padding: 1%;
-    z-index: 10000;
-    display: flex;
-    clear: both;
-
-    .header-img {
-      height: 50px;
-    }
-    
-    .login-header{
-      position: relative;
-      left: 15px;
-      margin-top: 0 !important;
-      color: #F5F5F5 !important;
-      text-align: center;
-      font-style: italic;
-    }
-  }
-  
-  .login-body{
-    height: 90%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-
-    .login-blurb{
-      height: auto;
-      font-size: 20px;
-      margin: 1.5% 0 !important;
-    }
-
-    .login-gif{
-      border-radius: 4px;
-      width: 30%;
-      margin-bottom: 2%;
-    }
-  
-    .login-btn{
-      border-radius: 4px;
-      font-size:20px;
-    }
-  }
-
 }

@@ -84,7 +84,6 @@ router.get("/callback", function(req, res) {
           querystring.stringify({
             access_token: access_token,
             user_id: user_id
-            // refresh_token: refresh_token
           }));
         });
 

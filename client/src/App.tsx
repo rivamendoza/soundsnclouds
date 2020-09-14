@@ -446,8 +446,10 @@ class App extends Component{
   /****************************** RENDER APP ******************************/
   public componentDidMount() {
     // check access_token
-    this.loggedIn = (window.location.pathname.split("/")[1] == "") ? false : true
+    this.loggedIn = (window.location.pathname.includes("access_token")) ? false : true
     
+    console.log(window.location.pathname.includes("access_token"));
+
     // start main application process if logged in
     if(this.loggedIn) {
       this.setSpotifyDetails();

@@ -81,7 +81,7 @@ router.get("/callback", function(req, res) {
           user_id = body.id;
           // current host
           let host = req.get('host').split(":")[0];
-
+          console.log("host: ", host);
           res.redirect(`http://${host}:3000/`+
           querystring.stringify({
             access_token: access_token,

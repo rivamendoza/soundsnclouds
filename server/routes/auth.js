@@ -8,13 +8,11 @@ const request = require('request');
 const router = express.Router();
 const querystring = require('querystring');
 
-const host = req.get('host').split(":")[0];
 const stateKey = 'spotify_auth_state';
 
 // spotify api credentials
 const CLIENT_ID = 'c32e2b8a2a74444f9448149ddd2d22d8'; 
 const CLIENT_SECRET = 'bc1a9f6e6cb543278f55e30d25ea1b4a'; 
-const REDIRECT_URI = `http://${host}:9000/auth/callback`; 
 
 
 /**
@@ -23,6 +21,8 @@ const REDIRECT_URI = `http://${host}:9000/auth/callback`;
 router.get('/login', function(req, res) {
   let state = generateRandomString(16);
   let scope = 'user-read-private user-read-email playlist-modify-public playlist-modify-private';
+  let host = req.get('host').split(":")[0];
+  let REDIRECT_URI = `http://${host}:9000/auth/callback`; 
 
   res.cookie(stateKey, state)
 
@@ -44,6 +44,8 @@ router.get("/callback", function(req, res) {
   let code = req.query.code || null;
   let state = req.query.state || null;
   let storedState = req.cookies ? req.cookies[stateKey] : null;
+  let host = req.get('host').split(":")[0];
+  let REDIRECT_URI = `http://${host}:9000/auth/callback`; 
 
   if (state === null || state !== storedState) {
     res.redirect('/#' +
@@ -81,8 +83,6 @@ router.get("/callback", function(req, res) {
         // use the access token to access the Spotify Web API
         request.get(options, function(error, response, body) {
           user_id = body.id;
-
-
 
           res.redirect(`http://${host}:3000/`+
           querystring.stringify({

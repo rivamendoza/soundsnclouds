@@ -15,3 +15,12 @@ Steps:
 6. To exit the application, simply press `Ctrl+C` or run `docker-compose down`
 
 Notes: you must have port 3000 free to run this application, due to the Spotify Web API redirect URI rules (will change this one day so that user running this must input their own client ID and set their own redirect URIs).
+
+#### Common problems
+If you are redirected to an empty page with just the header, then make sure location services are enabled in your browser. 
+
+![problem](https://octodex.github.com/images/yaktocat.png)
+
+Once you've turned on location services, try refreshing the page.
+
+![solved](https://octodex.github.com/images/yaktocat.png)

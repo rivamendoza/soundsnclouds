@@ -1,6 +1,6 @@
 # soundsnclouds
 
-#### How to run locally using `docker-compose` 
+#### Run locally using `docker-compose` 
 
 Requirements:
 - Spotify premium account

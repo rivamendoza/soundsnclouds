@@ -19,8 +19,8 @@ Notes: you must have port 3000 free to run this application, due to the Spotify 
 #### Common problems
 If you are redirected to an empty page with just the header, then make sure location services are enabled in your browser. 
 
-![problem](https://octodex.github.com/images/yaktocat.png)
+![problem](images/problem.png)
 
 Once you've turned on location services, try refreshing the page.
 
-![solved](https://octodex.github.com/images/yaktocat.png)
+![solved](images/solved.png)
